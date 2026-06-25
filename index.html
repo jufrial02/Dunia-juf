@@ -50,28 +50,27 @@
         scene.add(rumah);
 
 
-                // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
+                        // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
         const grupTangan = new THREE.Group(); 
         
         // Material Kulit Wanita
         const matKulit = new THREE.MeshBasicMaterial({ color: 0xFFD1B3 }); 
-        const geoLengan = new THREE.BoxGeometry(0.12, 0.12, 0.5); // Sedikit kita tebalkan dan panjangkan
+        const geoLengan = new THREE.BoxGeometry(0.08, 0.08, 0.4); 
 
-        // Tangan Kiri (Digeser agak naik ke -0.15 dan agak maju ke depan ke -0.5)
+        // Tangan Kiri
         const lenganKiri = new THREE.Mesh(geoLengan, matKulit);
-        lenganKiri.position.set(-0.25, -0.15, -0.5); 
-        lenganKiri.rotation.set(0.1, 0.2, -0.1); // Sudut kemiringan tangan ditekuk ke dalam
+        lenganKiri.position.set(-0.15, -0.05, -0.3); 
+        lenganKiri.rotation.set(0.2, 0.3, -0.1); 
         grupTangan.add(lenganKiri);
 
-        // Tangan Kanan (Digeser agak naik ke -0.15 dan agak maju ke depan ke -0.5)
+        // Tangan Kanan
         const lenganKanan = new THREE.Mesh(geoLengan, matKulit);
-        lenganKanan.position.set(0.25, -0.15, -0.5); 
-        lenganKanan.rotation.set(0.1, -0.2, 0.1); // Sudut kemiringan tangan ditekuk ke dalam
+        lenganKanan.position.set(0.15, -0.05, -0.3); 
+        lenganKanan.rotation.set(0.2, -0.3, 0.1); 
         grupTangan.add(lenganKanan);
 
-        // Masukkan ke kamera
+        // Pasang grup tangan langsung menempel di depan lensa kamera
         camera.add(grupTangan);
-        scene.add(camera);
 
 
 
