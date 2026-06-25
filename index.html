@@ -50,28 +50,29 @@
         scene.add(rumah);
 
 
-        // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
-        const grupTangan = new THREE.Group(); // Wadah agar tangan nempel ke kamera
+                // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
+        const grupTangan = new THREE.Group(); 
         
-        // Material Kulit Wanita (Warna cerah/peach soft)
+        // Material Kulit Wanita
         const matKulit = new THREE.MeshBasicMaterial({ color: 0xFFD1B3 }); 
-        const geoLengan = new THREE.BoxGeometry(0.1, 0.1, 0.4); // Bentuk kotak lengan memanjang
+        const geoLengan = new THREE.BoxGeometry(0.12, 0.12, 0.5); // Sedikit kita tebalkan dan panjangkan
 
-        // Tangan Kiri
+        // Tangan Kiri (Digeser agak naik ke -0.15 dan agak maju ke depan ke -0.5)
         const lenganKiri = new THREE.Mesh(geoLengan, matKulit);
-        lenganKiri.position.set(-0.3, -0.25, -0.4); // Posisi di kiri bawah mata
-        lenganKiri.rotation.set(0.2, 0.1, 0);
+        lenganKiri.position.set(-0.25, -0.15, -0.5); 
+        lenganKiri.rotation.set(0.1, 0.2, -0.1); // Sudut kemiringan tangan ditekuk ke dalam
         grupTangan.add(lenganKiri);
 
-        // Tangan Kanan
+        // Tangan Kanan (Digeser agak naik ke -0.15 dan agak maju ke depan ke -0.5)
         const lenganKanan = new THREE.Mesh(geoLengan, matKulit);
-        lenganKanan.position.set(0.3, -0.25, -0.4); // Posisi di kanan bawah mata
-        lenganKanan.rotation.set(0.2, -0.1, 0);
+        lenganKanan.position.set(0.25, -0.15, -0.5); 
+        lenganKanan.rotation.set(0.1, -0.2, 0.1); // Sudut kemiringan tangan ditekuk ke dalam
         grupTangan.add(lenganKanan);
 
-        // Masukkan grup tangan ke dalam kamera agar ikut bergerak ke mana pun kamera menengok
+        // Masukkan ke kamera
         camera.add(grupTangan);
-        scene.add(camera); // Penting: Kamera harus dimasukkan ke scene agar objek di dalamnya ikut termuat
+        scene.add(camera);
+
 
 
         // --- 4. KONTROL SENTUH ---
