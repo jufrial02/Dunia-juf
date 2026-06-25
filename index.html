@@ -5,38 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dunia Juf 3D</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #000;
-            user-select: none;
-        }
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
-        /* Penanda silang tengah layar (Crosshair) seperti game COD */
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #000; user-select: none; }
+        canvas { display: block; width: 100vw; height: 100vh; }
         #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 6px;
-            height: 6px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
+            position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
+            background-color: rgba(255, 255, 255, 0.5); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
         }
     </style>
-    /* Mengambil library Three.js langsung via CDN */
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
     <div id="crosshair"></div>
 
-    <script src="js/main.js"></script>
+    <script>
+        // --- ALL 3D CODE HERE ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); 
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 5); 
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const cahayaSemesta = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(cahayaSemesta);
+
+        // LANTAI
+        const geoTanah = new THREE.PlaneGeometry(200, 200);
+        const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
+        const tanah = new THREE.Mesh(geoTanah, matTanah);
+        tanah.rotation.x = -Math.PI / 2;
+        scene.add(tanah);
+
+        // RUMAH COKELAT
+        const geoRumah = new THREE.BoxGeometry(4, 4, 4);
+        const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+        const rumah = new THREE.Mesh(geoRumah, matRumah);
+        rumah.position.set(0, 2, -5); 
+        scene.add(rumah);
+
+        // KONTROL SENTUH
+        let sudutPandangX = 0;
+        let sudutPandangY = 0;
+        const sentuhan = {
+            kiriId: null, kiriStart: {x: 0, y: 0}, kiriMove: {x: 0, y: 0},
+            kananId: null, kananStart: {x: 0, y: 0}, kananMove: {x: 0, y: 0}
+        };
+
+        window.addEventListener('touchstart', (e) => {
+            for(let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.clientX < window.innerWidth / 2 && sentuhan.kiriId === null) {
+                    sentuhan.kiriId = touch.identifier;
+                    sentuhan.kiriStart.x = touch.clientX; sentuhan.kiriStart.y = touch.clientY;
+                    sentuhan.kiriMove.x = touch.clientX; sentuhan.kiriMove.y = touch.clientY;
+                } else if (touch.clientX >= window.innerWidth / 2 && sentuhan.kananId === null) {
+                    sentuhan.kananId = touch.identifier;
+                    sentuhan.kananStart.x = touch.clientX; sentuhan.kananStart.y = touch.clientY;
+                }
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            for(let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                if (touch.identifier === null) continue;
+                if (touch.identifier === sentuhan.kiriId) {
+                    sentuhan.kiriMove.x = touch.clientX; sentuhan.kiriMove.y = touch.clientY;
+                } else if (touch.identifier === sentuhan.kananId) {
+                    const deltaX = touch.clientX - sentuhan.kananStart.x;
+                    const deltaY = touch.clientY - sentuhan.kananStart.y;
+                    sudutPandangX -= deltaX * 0.005;
+                    sudutPandangY -= deltaY * 0.005;
+                    sudutPandangY = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, sudutPandangY));
+                    sentuhan.kananStart.x = touch.clientX; sentuhan.kananStart.y = touch.clientY;
+                }
+            }
+        });
+
+        window.addEventListener('touchend', (e) => {
+            for(let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === sentuhan.kiriId) { sentuhan.kiriId = null; }
+                else if (touch.identifier === sentuhan.kananId) { sentuhan.kananId = null; }
+            }
+        });
+
+        const kecepatanJalan = 0.08;
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const targetRotasiKamera = new THREE.Quaternion();
+            targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
+            camera.quaternion.slerp(targetRotasiKamera, 0.2);
+
+            if (sentuhan.kiriId !== null) {
+                const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
+                const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
+                const totalDist = Math.sqrt(dX*dX + dY*dY);
+
+                if (totalDist > 10) {
+                    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+                    forward.y = 0; forward.normalize();
+                    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+                    right.y = 0; right.normalize();
+
+                    camera.position.addScaledVector(forward, (-dY / totalDist) * kecepatanJalan);
+                    camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
+                }
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
