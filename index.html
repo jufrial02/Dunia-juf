@@ -20,7 +20,7 @@
     <div id="crosshair"></div>
 
     <script>
-        // --- ALL 3D CODE HERE ---
+        // --- 1. SETUP DUNIA 3D ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
 
@@ -34,6 +34,7 @@
         const cahayaSemesta = new THREE.AmbientLight(0xffffff, 1.5);
         scene.add(cahayaSemesta);
 
+        // --- 2. MEMBUAT MAP ---
         // LANTAI
         const geoTanah = new THREE.PlaneGeometry(200, 200);
         const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
@@ -48,7 +49,32 @@
         rumah.position.set(0, 2, -5); 
         scene.add(rumah);
 
-        // KONTROL SENTUH
+
+        // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
+        const grupTangan = new THREE.Group(); // Wadah agar tangan nempel ke kamera
+        
+        // Material Kulit Wanita (Warna cerah/peach soft)
+        const matKulit = new THREE.MeshBasicMaterial({ color: 0xFFD1B3 }); 
+        const geoLengan = new THREE.BoxGeometry(0.1, 0.1, 0.4); // Bentuk kotak lengan memanjang
+
+        // Tangan Kiri
+        const lenganKiri = new THREE.Mesh(geoLengan, matKulit);
+        lenganKiri.position.set(-0.3, -0.25, -0.4); // Posisi di kiri bawah mata
+        lenganKiri.rotation.set(0.2, 0.1, 0);
+        grupTangan.add(lenganKiri);
+
+        // Tangan Kanan
+        const lenganKanan = new THREE.Mesh(geoLengan, matKulit);
+        lenganKanan.position.set(0.3, -0.25, -0.4); // Posisi di kanan bawah mata
+        lenganKanan.rotation.set(0.2, -0.1, 0);
+        grupTangan.add(lenganKanan);
+
+        // Masukkan grup tangan ke dalam kamera agar ikut bergerak ke mana pun kamera menengok
+        camera.add(grupTangan);
+        scene.add(camera); // Penting: Kamera harus dimasukkan ke scene agar objek di dalamnya ikut termuat
+
+
+        // --- 4. KONTROL SENTUH ---
         let sudutPandangX = 0;
         let sudutPandangY = 0;
         const sentuhan = {
@@ -95,15 +121,26 @@
             }
         });
 
+
+        // --- 5. GAME LOOP & EFEK AYUNAN TANGAN ---
         const kecepatanJalan = 0.08;
+        let waktuAyunan = 0; // Variabel untuk hitungan matematika ayunan
+
         function animate() {
             requestAnimationFrame(animate);
 
+            // Rotasi Kamera
             const targetRotasiKamera = new THREE.Quaternion();
             targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
             camera.quaternion.slerp(targetRotasiKamera, 0.2);
 
+            // Logika Ayunan Tangan (Bobbing)
+            waktuAyunan += 0.05; // Efek napas konstan saat diam
+            
             if (sentuhan.kiriId !== null) {
+                // Jika sedang berjalan, buat ayunan tangannya bergerak lebih cepat (ritme melangkah)
+                waktuAyunan += 0.1; 
+                
                 const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
                 const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
                 const totalDist = Math.sqrt(dX*dX + dY*dY);
@@ -118,6 +155,11 @@
                     camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
                 }
             }
+
+            // Terapkan efek ayunan (Sinus & Cosinus) ke posisi Y dan X grup tangan
+            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.015;
+            grupTangan.position.x = Math.cos(waktuAyunan) * 0.01;
+
             renderer.render(scene, camera);
         }
         animate();
