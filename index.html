@@ -50,28 +50,31 @@
         scene.add(rumah);
 
 
-                                // --- 3. MENCIPTAKAN TANGAN KARAKTER WANITA (First-Person Arms) ---
+        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA (First-Person Arms) ---
         const grupTangan = new THREE.Group(); 
         
-        // Material Kulit Wanita
-        const matKulit = new THREE.MeshBasicMaterial({ color: 0xFFD1B3 }); 
-        const geoLengan = new THREE.BoxGeometry(0.1, 0.1, 0.4); 
+        // Warna kulit pria (sawo matang / sedikit lebih gelap dari yang tadi)
+        const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); 
+        const geoLengan = new THREE.BoxGeometry(0.1, 0.1, 0.5); 
 
-        // Tangan Kiri (Digeser pas di batas bawah layar HP)
-        const lenganKiri = new THREE.Mesh(geoLengan, matKulit);
-        lenganKiri.position.set(-0.2, -0.2, -0.4); 
-        lenganKiri.rotation.set(0.2, 0.2, -0.1); 
+        // Tangan Kiri 
+        const lenganKiri = new THREE.Mesh(geoLengan, matKulitPria);
+        lenganKiri.position.set(-0.25, -0.25, -0.5); 
+        lenganKiri.rotation.set(0.2, 0.3, -0.1); 
         grupTangan.add(lenganKiri);
 
-        // Tangan Kanan (Digeser pas di batas bawah layar HP)
-        const lenganKanan = new THREE.Mesh(geoLengan, matKulit);
-        lenganKanan.position.set(0.2, -0.2, -0.4); 
-        lenganKanan.rotation.set(0.2, -0.2, 0.1); 
+        // Tangan Kanan
+        const lenganKanan = new THREE.Mesh(geoLengan, matKulitPria);
+        lenganKanan.position.set(0.25, -0.25, -0.5); 
+        lenganKanan.rotation.set(0.2, -0.3, 0.1); 
         grupTangan.add(lenganKanan);
 
-        // Pasang grup tangan langsung menempel di depan lensa kamera
+        // Kunci posisi grup tangan ke kamera
         camera.add(grupTangan);
-
+        
+        // Atur bidang potong kamera agar objek sedekat apa pun (termasuk tangan) tidak disembunyikan oleh browser HP
+        camera.near = 0.01;
+        camera.updateProjectionMatrix();
 
 
 
