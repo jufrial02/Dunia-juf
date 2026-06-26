@@ -1,88 +1,71 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Dunia Juf</title>
-<style>
-body{margin:0;overflow:hidden;background:#87CEEB;touch-action:none}
-canvas{display:block}
-#crosshair{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);opacity:.7}
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dunia Juf</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #7ec0ee; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-<div id="crosshair"></div>
-<script>
-// Versi fondasi Dunia Juf.
-// Salin logika tangan, kontrol sentuh, dan animasi dari index lama ke sini.
-// File ini adalah fondasi bersih agar proyek tidak lagi tercampur.
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x87CEEB);
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+        import { buatKarakterManusia } from './js/human_model/human_model.js';
 
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-document.body.appendChild(renderer.domElement);
+        // 1. SETUP DASAR THREE.JS
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x7ec0ee); // Warna langit biru
 
-const player=new THREE.Group();
-scene.add(player);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
-camera.position.set(0, 1.6, 2.5);
-camera.lookAt(0, 1.2, 0);
-player.add(camera);
+        // 2. CAHAYA (Agar bentuk 3D-nya kelihatan jelas)
+        const cahayaAmbi = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(cahayaAmbi);
+        const cahayaMatahari = new THREE.DirectionalLight(0xffffff, 0.6);
+        cahayaMatahari.position.set(5, 10, 7);
+        scene.add(cahayaMatahari);
 
-scene.add(new THREE.AmbientLight(0xffffff,0.5));
-const sun=new THREE.DirectionalLight(0xffffff,1);
-sun.position.set(5,10,5);
-scene.add(sun);
+        // 3. TANAH HIJAU SEMENTARA
+        const geoTanah = new THREE.PlaneGeometry(100, 100);
+        const matTanah = new THREE.MeshBasicMaterial({ color: 0x556b2f });
+        const tanah = new THREE.Mesh(geoTanah, matTanah);
+        tanah.rotation.x = -Math.PI / 2;
+        scene.add(tanah);
 
-const ground=new THREE.Mesh(
- new THREE.PlaneGeometry(100,100),
- new THREE.MeshStandardMaterial({color:0x4CAF50})
-);
-ground.rotation.x=-Math.PI/2;
-scene.add(ground);
+        // 4. PANGGIL KARAKTER UTAMA DARI ES MODULES
+        const karakterUtama = buatKarakterManusia();
+        scene.add(karakterUtama);
 
-const torso=new THREE.Mesh(
- new THREE.BoxGeometry(0.45,0.65,0.25),
- new THREE.MeshStandardMaterial({color:0x444444})
-);
-torso.position.set(0,1.1,0);
-player.add(torso);
-// =======================
-// KEPALA
-// =======================
-const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.14, 32, 32),
-    new THREE.MeshStandardMaterial({
-        color: 0xD2B48C
-    })
-);
+        // Posisikan karakter agak mundur dan ke bawah sedikit agar pas di depan kamera
+        karakterUtama.position.set(0, 0.5, -0.6);
 
-head.position.set(0, 1.55, 0);
+        // Kamera melihat ke arah karakter
+        camera.position.set(0, 0.8, 0);
 
-player.add(head);
- 
-const house=new THREE.Mesh(
- new THREE.BoxGeometry(3,3,3),
- new THREE.MeshStandardMaterial({color:0x8B4513})
-);
-house.position.set(0,1.5,-5);
-scene.add(house);
+        // 5. ANIMATION LOOP (Untuk merender layar terus-menerus)
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Di sini nanti tempat kita naruh animasi jalan / gerak tangan
+            
+            renderer.render(scene, camera);
+        }
 
-function animate(){
- requestAnimationFrame(animate);
- renderer.render(scene,camera);
-}
-animate();
+        // Antisipasi perubahan ukuran layar HP (Rotasi layar)
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
-</script>
+        // Jalankan dunianya!
+        animate();
+    </script>
 </body>
 </html>
