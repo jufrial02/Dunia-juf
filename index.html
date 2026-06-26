@@ -174,7 +174,7 @@
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
-                function animate() {
+                        function animate() {
             requestAnimationFrame(animate);
 
             const targetRotasiKamera = new THREE.Quaternion();
@@ -208,19 +208,19 @@
             if (window.sikuKanan && window.sikuKiri) {
                 const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
                 
-                // Menaikkan sudut siku tajam ke atas
-                window.sikuKanan.rotation.x = -1.8 + efekTekukJalan;
-                window.sikuKiri.rotation.x = -1.8 + efekTekukJalan;
+                // Setelan Siku
+                window.sikuKanan.rotation.x = -1.5 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -1.5 + efekTekukJalan;
 
-                window.sikuKanan.rotation.y = -0.4;
-                window.sikuKiri.rotation.y = 0.4;
+                window.sikuKanan.rotation.y = -0.3;
+                window.sikuKiri.rotation.y = 0.3;
                 
-                window.sikuKanan.rotation.z = -0.3;
-                window.sikuKiri.rotation.z = 0.3;
+                window.sikuKanan.rotation.z = -0.2;
+                window.sikuKiri.rotation.z = 0.2;
 
-                // KODE BARU: Meluruskan pergelangan tangan agar kulit sawo matang muncul
-                window.pergelanganKanan.rotation.x = 0.8;
-                window.pergelanganKiri.rotation.x = 0.8;
+                // 🔥 PERBAIKAN DI SINI: Pergelangan ditekuk ke depan (0.6) agar telapak sawo matang kelihatan jelas!
+                window.pergelanganKanan.rotation.x = 0.6;
+                window.pergelanganKiri.rotation.x = 0.6;
             }
 
             renderer.render(scene, camera);
