@@ -40,72 +40,241 @@
                 const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
                 
                 // Nilai diubah dari -0.6 menjadi -1.2 agar lengan bawah menekuk tajam ke atas (terlihat di layar)
-                window.sikuKanan.rotation.x = -1.2 + efekTekukJalan;
-                window.sikuKiri.rotation.x = -1.2 + efekTekukJalan;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dunia Juf</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; user-select: none; touch-action: none; }
+        canvas { display: block; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%;
+            width: 6px; height: 6px; background: white;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; opacity: 0.7;
+        }
+    </style>
+    <!-- Memuat Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
 
-                // Membuat lengan bawah dan telapak tangan menghadap serong ke tengah titik bidik
-                window.sikuKanan.rotation.y = -0.3;
-                window.sikuKiri.rotation.y = 0.3;
-                
-                // Rotasi Z sedikit diputar agar posisi telapak tangan terlihat natural (telungkup alami)
-                window.sikuKanan.rotation.z = -0.2;
-                window.sikuKiri.rotation.z = 0.2;
-            }
+    <div id="crosshair"></div>
 
+    <script>
+        // --- 1. SETUP INVESTASI DUNIA 3D (SCENE, CAMERA, RENDERER) ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Langit Biru
 
-        // --- 3. ANATOMI DETAIl KERANGKA & OTOT TANGAN (KANAN & KIRI) ---
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 5); // Tinggi mata manusia normal (1.6 meter)
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Pencahayaan agar otot dan bayangan tangan terlihat jelas
+        const cahayaMatahari = new THREE.DirectionalLight(0xffffff, 1.0);
+        cahayaMatahari.position.set(5, 10, 5);
+        scene.add(cahayaMatahari);
+
+        const cahayaLingkungan = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(cahayaLingkungan);
+
+        // --- 2. LINGKUNGAN (TANAH & RUMAH COKELAT) ---
+        const geoTanah = new THREE.PlaneGeometry(100, 100);
+        const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 }); // Rumput Hijau
+        const tanah = new THREE.Mesh(geoTanah, matTanah);
+        tanah.rotation.x = -Math.PI / 2;
+        scene.add(tanah);
+
+        const geoRumah = new THREE.BoxGeometry(3, 3, 3);
+        const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Rumah Cokelat
+        const rumah = new THREE.Mesh(geoRumah, matRumah);
+        rumah.position.set(0, 1.5, -2);
+        scene.add(rumah);
+
+        // --- 3. ANATOMI DETAIL KERANGKA & OTOT TANGAN (KANAN & KIRI) ---
         const grupTangan = new THREE.Group();
 
-        // WARNA LAPISAN ANATOMI (Biar Jelas Bedanya)
-        const matOtotLenganAtas = new THREE.MeshStandardMaterial({ color: 0x990000, roughness: 0.6 }); // Otot Merah Tebal
-        const matOtotLenganBawah = new THREE.MeshStandardMaterial({ color: 0xcc3333, roughness: 0.5 }); // Otot Lengan Bawah
-        const matTelapakKulit = new THREE.MeshStandardMaterial({ color: 0xD2B48C, roughness: 0.7 });   // Lapisan Kulit luar awal
+        const matOtotLenganAtas = new THREE.MeshStandardMaterial({ color: 0x990000, roughness: 0.6 }); 
+        const matOtotLenganBawah = new THREE.MeshStandardMaterial({ color: 0xcc3333, roughness: 0.5 }); 
+        const matTelapakKulit = new THREE.MeshStandardMaterial({ color: 0xD2B48C, roughness: 0.7 });   
 
-        // ==========================================
-        // FUNGSI UNTUK MEMBUAT SATU LENGAN LENGKAP
-        // ==========================================
         function buatLenganAnatomi(isKanan) {
             const grupLengan = new THREE.Group();
             const sisi = isKanan ? 1 : -1;
 
-            // 1. TULANG / KERANGKA PUSAT (Hierarki Sendi)
             const pangkalBahu = new THREE.Group();
             const sendiSiku = new THREE.Group();
             const sendiPergelangan = new THREE.Group();
 
-            // Hubungkan Rantai Tulang Kerangka
             pangkalBahu.add(sendiSiku);
             sendiSiku.add(sendiPergelangan);
 
-            // Atur Jarak Antar Panjang Tulang Kerangka (Meter)
-            sendiSiku.position.set(0, -0.05, -0.18);          // Panjang tulang lengan atas
-            sendiPergelangan.position.set(0, -0.02, -0.16);  // Panjang tulang lengan bawah
+            sendiSiku.position.set(0, -0.05, -0.18);          
+            sendiPergelangan.position.set(0, -0.02, -0.16);  
 
-            // 2. LAPISAN OTOT LENGAN ATAS (Bahu ke Siku) - Bentuk Silinder Tebal
             const geoOtotAtas = new THREE.CylinderGeometry(0.028, 0.035, 0.18, 8);
-            geoOtotAtas.rotateX(Math.PI / 2); // Rebahkan silinder mengikuti arah tulang
+            geoOtotAtas.rotateX(Math.PI / 2); 
             const ototAtasMesh = new THREE.Mesh(geoOtotAtas, matOtotLenganAtas);
-            ototAtasMesh.position.set(0, -0.025, -0.09); // Posisikan di tengah antara bahu & siku
+            ototAtasMesh.position.set(0, -0.025, -0.09); 
             pangkalBahu.add(ototAtasMesh);
 
-            // 3. LAPISAN OTOT LENGAN BAWAH (Siku ke Pergelangan) - Mengecil ke Ujung
             const geoOtotBawah = new THREE.CylinderGeometry(0.022, 0.032, 0.16, 8);
             geoOtotBawah.rotateX(Math.PI / 2);
             const ototBawahMesh = new THREE.Mesh(geoOtotBawah, matOtotLenganBawah);
-            ototBawahMesh.position.set(0, -0.01, -0.08); // Posisikan di tengah lengan bawah
+            ototBawahMesh.position.set(0, -0.01, -0.08); 
             sendiSiku.add(ototBawahMesh);
 
-            // 4. LAPISAN TELAPAK & JARI AWAL (Di Pergelangan)
             const geoTelapak = new THREE.BoxGeometry(0.05, 0.02, 0.07);
             const telapakMesh = new THREE.Mesh(geoTelapak, matTelapakKulit);
             telapakMesh.position.set(0, 0, -0.035);
             sendiPergelangan.add(telapakMesh);
 
-            // Simpan referensi sendi ke grup luar agar bisa digerakkan lewat animasi nanti
             grupLengan.userData = {
                 siku: sendiSiku,
                 pergelangan: sendiPergelangan
             };
+
+            grupLengan.add(pangkalBahu);
+            grupLengan.position.set(0.13 * sisi, -0.14, -0.28);
+            grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
+
+            return grupLengan;
+        }
+
+        const lenganKanan = buatLenganAnatomi(true);
+        const lenganKiri = buatLenganAnatomi(false);
+
+        grupTangan.add(lenganKanan);
+        grupTangan.add(lenganKiri);
+
+        camera.add(grupTangan);
+        scene.add(camera);
+
+        // PENEMPATAN DAFTAR SENDI GLOBAL
+        window.sikuKanan = lenganKanan.userData.siku;
+        window.sikuKiri = lenganKiri.userData.siku;
+        window.pergelanganKanan = lenganKanan.userData.pergelangan;
+        window.pergelanganKiri = lenganKiri.userData.pergelangan;
+
+        // --- 4. KONTROL SENTUH LAYAR HP ---
+        let sudutPandangX = 0;
+        let sudutPandangY = 0;
+
+        const sentuhan = {
+            kiriId: null, kiriStart: new THREE.Vector2(), kiriMove: new THREE.Vector2(),
+            kananId: null, kananStart: new THREE.Vector2(), kananMove: new THREE.Vector2()
+        };
+
+        window.addEventListener('touchstart', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.clientX < window.innerWidth / 2) {
+                    if (sentuhan.kiriId === null) {
+                        sentuhan.kiriId = t.identifier;
+                        sentuhan.kiriStart.set(t.clientX, t.clientY);
+                        sentuhan.kiriMove.set(t.clientX, t.clientY);
+                    }
+                } else {
+                    if (sentuhan.kananId === null) {
+                        sentuhan.kananId = t.identifier;
+                        sentuhan.kananStart.set(t.clientX, t.clientY);
+                        sentuhan.kananMove.set(t.clientX, t.clientY);
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.identifier === sentuhan.kiriId) {
+                    sentuhan.kiriMove.set(t.clientX, t.clientY);
+                } else if (t.identifier === sentuhan.kananId) {
+                    const dX = t.clientX - sentuhan.kananMove.x;
+                    const dY = t.clientY - sentuhan.kananMove.y;
+                    sudutPandangX -= dX * 0.005;
+                    sudutPandangY -= dY * 0.005;
+                    sudutPandangY = Math.max(-Math.PI/3, Math.min(Math.PI/3, sudutPandangY));
+                    sentuhan.kananMove.set(t.clientX, t.clientY);
+                }
+            }
+        });
+
+        window.addEventListener('touchend', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.identifier === sentuhan.kiriId) sentuhan.kiriId = null;
+                if (t.identifier === sentuhan.kananId) sentuhan.kananId = null;
+            }
+        });
+
+        // --- 5. GAME LOOP DENGAN GERAKAN OTOT & SENDI SIKU TEPAT ---
+        const kecepatanJalan = 0.08;
+        let waktuAyunan = 0; 
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const targetRotasiKamera = new THREE.Quaternion();
+            targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
+            camera.quaternion.slerp(targetRotasiKamera, 0.2);
+
+            if (sentuhan.kiriId !== null) {
+                waktuAyunan += 0.14; 
+                const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
+                const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
+                const totalDist = Math.sqrt(dX*dX + dY*dY);
+
+                if (totalDist > 10) {
+                    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+                    forward.y = 0; forward.normalize();
+                    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+                    right.y = 0; right.normalize();
+
+                    camera.position.addScaledVector(forward, (-dY / totalDist) * kecepatanJalan);
+                    camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
+                }
+            } else {
+                waktuAyunan += 0.02; 
+            }
+
+            // Ayunan Lengan Utama
+            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
+            grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
+
+            // LOGIKA MENEKUK JURUSAN SIKU KE ATAS LAYAR HP
+            if (window.sikuKanan && window.sikuKiri) {
+                const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
+                
+                // Menaikkan sudut siku tajam ke atas (-1.2) agar bagian lengan depan terlihat
+                window.sikuKanan.rotation.x = -1.2 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -1.2 + efekTekukJalan;
+
+                window.sikuKanan.rotation.y = -0.3;
+                window.sikuKiri.rotation.y = 0.3;
+                
+                window.sikuKanan.rotation.z = -0.2;
+                window.sikuKiri.rotation.z = 0.2;
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- 6. ADJUST SCREEN SIZE ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
 
             grupLengan.add(pangkalBahu);
             
