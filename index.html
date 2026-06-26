@@ -47,28 +47,30 @@
         rumah.position.set(0, 2, -5); 
         scene.add(rumah);
 
-        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA ---
+        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA (UKURAN BESAR UNTUK TES) ---
         const grupTangan = new THREE.Group(); 
-        const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); // Warna Sawo Matang Cowok
-        const geoLengan = new THREE.BoxGeometry(0.08, 0.08, 0.4); 
+        
+        const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); 
+        // Kita perbesar ukurannya (lebar 0.3, tinggi 0.3, panjang 1.5 meter)
+        const geoLengan = new THREE.BoxGeometry(0.3, 0.3, 1.5); 
 
-        // Tangan Kiri (Koordinat diturunkan sedikit ke -0.25 agar pas di pojok HP)
+        // Tangan Kiri (Ditaruh agak tengah dan dimajukan 1.5 meter di depan mata)
         const lenganKiri = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKiri.position.set(-0.25, -0.25, -0.4); 
-        lenganKiri.rotation.set(0.2, 0.2, -0.1); 
+        lenganKiri.position.set(-0.4, -0.2, -1.5); 
+        lenganKiri.rotation.set(0.1, 0.1, 0); 
         grupTangan.add(lenganKiri);
 
-        // Tangan Kanan
+        // Tangan Kanan (Ditaruh agak tengah dan dimajukan 1.5 meter di depan mata)
         const lenganKanan = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKanan.position.set(0.25, -0.25, -0.4); 
-        lenganKanan.rotation.set(0.2, -0.2, 0.1); 
+        lenganKanan.position.set(0.4, -0.2, -1.5); 
+        lenganKanan.rotation.set(0.1, -0.1, 0); 
         grupTangan.add(lenganKanan);
 
-        // Pasang kembali ke dalam kamera dengan sistem pengaman matrik
         camera.add(grupTangan);
         scene.add(camera);
 
-        // --- 4. KONTROL SENTUH ---
+
+                // --- 4. KONTROL SENTUH ---
         let sudutPandangX = 0;
         let sudutPandangY = 0;
         const sentuhan = {
@@ -114,7 +116,7 @@
             }
         });
 
-        // --- 5. GAME LOOP AMAN (FIXED CRASH) ---
+        // --- 5. GAME LOOP SINGLE & AMAN ---
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
@@ -126,7 +128,7 @@
             camera.quaternion.slerp(targetRotasiKamera, 0.2);
 
             if (sentuhan.kiriId !== null) {
-                waktuAyunan += 0.12; // Efek ayunan jalan
+                waktuAyunan += 0.12; 
                 const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
                 const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
                 const totalDist = Math.sqrt(dX*dX + dY*dY);
@@ -141,12 +143,12 @@
                     camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
                 }
             } else {
-                waktuAyunan += 0.02; // Efek napas pelan pas diam
+                waktuAyunan += 0.02; 
             }
 
-            // Sistem Ayunan Menggunakan Modifikasi Posisi Relatif (Aman dari Bug Meluncur)
-            grupTangan.position.y = -0.25 + Math.sin(waktuAyunan * 2) * 0.01;
-            grupTangan.position.x = Math.cos(waktuAyunan) * 0.005;
+            // Efek Ayunan Tangan Tes Ukuran Besar
+            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.02;
+            grupTangan.position.x = Math.cos(waktuAyunan) * 0.01;
 
             renderer.render(scene, camera);
         }
