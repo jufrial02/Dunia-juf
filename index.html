@@ -70,24 +70,28 @@
             pangkalBahu.add(sendiSiku);
             sendiSiku.add(sendiPergelangan);
 
+            // Menyesuaikan ulang titik sendi
             sendiSiku.position.set(0, -0.05, -0.18);          
-            sendiPergelangan.position.set(0, -0.02, -0.16);  
+            sendiPergelangan.position.set(0, -0.01, -0.16);  
 
+            // Otot Atas
             const geoOtotAtas = new THREE.CylinderGeometry(0.028, 0.035, 0.18, 8);
             geoOtotAtas.rotateX(Math.PI / 2); 
             const ototAtasMesh = new THREE.Mesh(geoOtotAtas, matOtotLenganAtas);
             ototAtasMesh.position.set(0, -0.025, -0.09); 
             pangkalBahu.add(ototAtasMesh);
 
+            // Otot Bawah
             const geoOtotBawah = new THREE.CylinderGeometry(0.022, 0.032, 0.16, 8);
             geoOtotBawah.rotateX(Math.PI / 2);
             const ototBawahMesh = new THREE.Mesh(geoOtotBawah, matOtotLenganBawah);
             ototBawahMesh.position.set(0, -0.01, -0.08); 
             sendiSiku.add(ototBawahMesh);
 
-            const geoTelapak = new THREE.BoxGeometry(0.05, 0.02, 0.07);
+            // 🔥 PERBAIKAN: Ukuran telapak diperpanjang (0.12) dan posisinya dimajukan (-0.06) agar menyembul keluar
+            const geoTelapak = new THREE.BoxGeometry(0.05, 0.02, 0.12);
             const telapakMesh = new THREE.Mesh(geoTelapak, matTelapakKulit);
-            telapakMesh.position.set(0, 0, -0.035);
+            telapakMesh.position.set(0, -0.01, -0.06);
             sendiPergelangan.add(telapakMesh);
 
             grupLengan.userData = {
@@ -97,7 +101,7 @@
 
             grupLengan.add(pangkalBahu);
             
-            // Posisi dirapatkan ke tengah (0.08) agar masuk frame portrait HP
+            // Mengatur posisi lengan agar pas di tengah frame HP
             grupLengan.position.set(0.08 * sisi, -0.12, -0.25);
             grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
 
@@ -174,7 +178,7 @@
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
-                        function animate() {
+        function animate() {
             requestAnimationFrame(animate);
 
             const targetRotasiKamera = new THREE.Quaternion();
@@ -200,33 +204,28 @@
                 waktuAyunan += 0.02; 
             }
 
-            // Ayunan Lengan Utama
             grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
             grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
 
-            // LOGIKA MENEKUK JURUSAN SIKU KE ATAS LAYAR HP
+            // ATUR TEKUKAN SENDI
             if (window.sikuKanan && window.sikuKiri) {
                 const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
                 
-                // Setelan Siku
-                window.sikuKanan.rotation.x = -1.5 + efekTekukJalan;
-                window.sikuKiri.rotation.x = -1.5 + efekTekukJalan;
+                // Siku menekuk proporsional
+                window.sikuKanan.rotation.x = -1.4 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -1.4 + efekTekukJalan;
 
-                window.sikuKanan.rotation.y = -0.3;
-                window.sikuKiri.rotation.y = 0.3;
+                window.sikuKanan.rotation.y = -0.2;
+                window.sikuKiri.rotation.y = 0.2;
                 
-                window.sikuKanan.rotation.z = -0.2;
-                window.sikuKiri.rotation.z = 0.2;
-
-                // 🔥 PERBAIKAN DI SINI: Pergelangan ditekuk ke depan (0.6) agar telapak sawo matang kelihatan jelas!
-                window.pergelanganKanan.rotation.x = 0.6;
-                window.pergelanganKiri.rotation.x = 0.6;
+                // Menurunkan pergelangan tangan agar telapak sawo matangnya menjulur lurus ke depan crosshair
+                window.pergelanganKanan.rotation.x = 0.7;
+                window.pergelanganKiri.rotation.x = 0.7;
             }
 
             renderer.render(scene, camera);
         }
         animate();
-
 
         // --- 6. ADJUST SCREEN SIZE ---
         window.addEventListener('resize', () => {
