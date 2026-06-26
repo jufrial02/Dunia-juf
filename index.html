@@ -34,18 +34,24 @@
         const cahayaSemesta = new THREE.AmbientLight(0xffffff, 1.5);
         scene.add(cahayaSemesta);
 
-        // --- 2. MEMBUAT MAP ---
-        const geoTanah = new THREE.PlaneGeometry(200, 200);
-        const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
-        const tanah = new THREE.Mesh(geoTanah, matTanah);
-        tanah.rotation.x = -Math.PI / 2;
-        scene.add(tanah);
+            // 2. LOGIKA TEKUKAN SENDI SIKU & OTOT BAWAH (DIANGKAT KE ATAS)
+            if (window.sikuKanan && window.sikuKiri) {
+                // Efek kontraksi otot saat berjalan
+                const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
+                
+                // Nilai diubah dari -0.6 menjadi -1.2 agar lengan bawah menekuk tajam ke atas (terlihat di layar)
+                window.sikuKanan.rotation.x = -1.2 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -1.2 + efekTekukJalan;
 
-        const geoRumah = new THREE.BoxGeometry(4, 4, 4);
-        const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-        const rumah = new THREE.Mesh(geoRumah, matRumah);
-        rumah.position.set(0, 2, -5); 
-        scene.add(rumah);
+                // Membuat lengan bawah dan telapak tangan menghadap serong ke tengah titik bidik
+                window.sikuKanan.rotation.y = -0.3;
+                window.sikuKiri.rotation.y = 0.3;
+                
+                // Rotasi Z sedikit diputar agar posisi telapak tangan terlihat natural (telungkup alami)
+                window.sikuKanan.rotation.z = -0.2;
+                window.sikuKiri.rotation.z = 0.2;
+            }
+
 
         // --- 3. ANATOMI DETAIl KERANGKA & OTOT TANGAN (KANAN & KIRI) ---
         const grupTangan = new THREE.Group();
