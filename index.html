@@ -59,7 +59,7 @@
         const matOtotLenganBawah = new THREE.MeshStandardMaterial({ color: 0xcc3333, roughness: 0.5 }); 
         const matTelapakKulit = new THREE.MeshStandardMaterial({ color: 0xD2B48C, roughness: 0.7 });   
 
-        function buatLenganAnatomi(isKanan) {
+                function buatLenganAnatomi(isKanan) {
             const grupLengan = new THREE.Group();
             const sisi = isKanan ? 1 : -1;
 
@@ -88,11 +88,20 @@
             ototBawahMesh.position.set(0, -0.01, -0.08); 
             sendiSiku.add(ototBawahMesh);
 
-            // 🔥 PERBAIKAN: Ukuran telapak diperpanjang (0.12) dan posisinya dimajukan (-0.06) agar menyembul keluar
-            const geoTelapak = new THREE.BoxGeometry(0.05, 0.02, 0.12);
+            // DI SINI PERUBAHAN BENTUK TELAPAK TANGANNYA:
+            // Membuat bentuk telapak agak melebar kesamping (pipih) tidak kotak kubus kaku
+            const geoTelapak = new THREE.BoxGeometry(0.06, 0.018, 0.11);
             const telapakMesh = new THREE.Mesh(geoTelapak, matTelapakKulit);
-            telapakMesh.position.set(0, -0.01, -0.06);
+            telapakMesh.position.set(0, -0.01, -0.055);
             sendiPergelangan.add(telapakMesh);
+
+            // Menambahkan struktur Ibu Jari (Jempol) kecil di samping telapak tangan
+            const geoJempol = new THREE.BoxGeometry(0.015, 0.015, 0.03);
+            const jempolMesh = new THREE.Mesh(geoJempol, matTelapakKulit);
+            // Posisi jempol diatur otomatis ke arah dalam sesuai tangan kanan/kiri
+            jempolMesh.position.set(0.035 * -sisi, 0, -0.02);
+            jempolMesh.rotation.y = 0.4 * sisi; 
+            telapakMesh.add(jempolMesh);
 
             grupLengan.userData = {
                 siku: sendiSiku,
@@ -101,7 +110,7 @@
 
             grupLengan.add(pangkalBahu);
             
-            // Mengatur posisi lengan agar pas di tengah frame HP
+            // Posisi standarnya agar merapat pas di depan kamera HP
             grupLengan.position.set(0.025 * sisi, -0.06, -0.25);
             grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
 
