@@ -24,7 +24,7 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB); 
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.set(0, 2, 5); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -35,45 +35,38 @@
         scene.add(cahayaSemesta);
 
         // --- 2. MEMBUAT MAP ---
-        // LANTAI
         const geoTanah = new THREE.PlaneGeometry(200, 200);
         const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
         const tanah = new THREE.Mesh(geoTanah, matTanah);
         tanah.rotation.x = -Math.PI / 2;
         scene.add(tanah);
 
-        // RUMAH COKELAT
         const geoRumah = new THREE.BoxGeometry(4, 4, 4);
         const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
         const rumah = new THREE.Mesh(geoRumah, matRumah);
         rumah.position.set(0, 2, -5); 
         scene.add(rumah);
 
-
-        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA (First-Person Arms) ---
+        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA ---
         const grupTangan = new THREE.Group(); 
-        
-        // Warna kulit pria (sawo matang)
-        const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); 
-        const geoLengan = new THREE.BoxGeometry(0.12, 0.12, 0.5); 
+        const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); // Warna Sawo Matang Cowok
+        const geoLengan = new THREE.BoxGeometry(0.08, 0.08, 0.4); 
 
-        // Tangan Kiri
+        // Tangan Kiri (Koordinat diturunkan sedikit ke -0.25 agar pas di pojok HP)
         const lenganKiri = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKiri.position.set(-0.25, -0.3, -0.5); 
-        lenganKiri.rotation.set(0.2, 0.3, -0.1); 
+        lenganKiri.position.set(-0.25, -0.25, -0.4); 
+        lenganKiri.rotation.set(0.2, 0.2, -0.1); 
         grupTangan.add(lenganKiri);
 
         // Tangan Kanan
         const lenganKanan = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKanan.position.set(0.25, -0.3, -0.5); 
-        lenganKanan.rotation.set(0.2, -0.3, 0.1); 
+        lenganKanan.position.set(0.25, -0.25, -0.4); 
+        lenganKanan.rotation.set(0.2, -0.2, 0.1); 
         grupTangan.add(lenganKanan);
 
-        // SEKARANG DIMASUKKAN KE SCENE, BUKAN CAMERA
-        scene.add(grupTangan);
-
-
-
+        // Pasang kembali ke dalam kamera dengan sistem pengaman matrik
+        camera.add(grupTangan);
+        scene.add(camera);
 
         // --- 4. KONTROL SENTUH ---
         let sudutPandangX = 0;
@@ -100,7 +93,6 @@
         window.addEventListener('touchmove', (e) => {
             for(let i = 0; i < e.touches.length; i++) {
                 const touch = e.touches[i];
-                if (touch.identifier === null) continue;
                 if (touch.identifier === sentuhan.kiriId) {
                     sentuhan.kiriMove.x = touch.clientX; sentuhan.kiriMove.y = touch.clientY;
                 } else if (touch.identifier === sentuhan.kananId) {
@@ -122,23 +114,19 @@
             }
         });
 
-
-        // --- 5. GAME LOOP & EFEK AYUNAN TANGAN ---
+        // --- 5. GAME LOOP AMAN (FIXED CRASH) ---
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotasi Kamera
             const targetRotasiKamera = new THREE.Quaternion();
             targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
             camera.quaternion.slerp(targetRotasiKamera, 0.2);
 
-            // Logika Pergerakan Jalan
-            waktuAyunan += 0.05; 
             if (sentuhan.kiriId !== null) {
-                waktuAyunan += 0.1; 
+                waktuAyunan += 0.12; // Efek ayunan jalan
                 const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
                 const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
                 const totalDist = Math.sqrt(dX*dX + dY*dY);
@@ -152,35 +140,13 @@
                     camera.position.addScaledVector(forward, (-dY / totalDist) * kecepatanJalan);
                     camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
                 }
+            } else {
+                waktuAyunan += 0.02; // Efek napas pelan pas diam
             }
 
-            // KODE BARU: Paksa grup tangan mengikuti posisi dan rotasi kamera di dalam Scene
-            grupTangan.position.copy(camera.position);
-            grupTangan.quaternion.copy(camera.quaternion);
-
-            // Terapkan efek ayunan jalan (Bobbing) relatif terhadap kamera
-            grupTangan.translateY(Math.sin(waktuAyunan * 2) * 0.015);
-            grupTangan.translateX(Math.cos(waktuAyunan) * 0.01);
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-
-                if (totalDist > 10) {
-                    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-                    forward.y = 0; forward.normalize();
-                    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-                    right.y = 0; right.normalize();
-
-                    camera.position.addScaledVector(forward, (-dY / totalDist) * kecepatanJalan);
-                    camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
-                }
-            }
-
-            // Terapkan efek ayunan (Sinus & Cosinus) ke posisi Y dan X grup tangan
-            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.015;
-            grupTangan.position.x = Math.cos(waktuAyunan) * 0.01;
+            // Sistem Ayunan Menggunakan Modifikasi Posisi Relatif (Aman dari Bug Meluncur)
+            grupTangan.position.y = -0.25 + Math.sin(waktuAyunan * 2) * 0.01;
+            grupTangan.position.x = Math.cos(waktuAyunan) * 0.005;
 
             renderer.render(scene, camera);
         }
