@@ -47,54 +47,85 @@
         rumah.position.set(0, 2, -5); 
         scene.add(rumah);
 
-        // --- 3. ANATOMI KERANGKA & OTOT TANGAN FIRST-PERSON ---
+        // --- 3. ANATOMI DETAIl KERANGKA & OTOT TANGAN (KANAN & KIRI) ---
         const grupTangan = new THREE.Group();
 
-        // 1. Material Kulit & Otot (Gunakan MeshStandardMaterial agar tekstur otot/lekukan bayangannya jelas)
-        const matTanganPro = new THREE.MeshStandardMaterial({ 
-            color: 0xD2B48C, 
-            roughness: 0.8,
-            metalness: 0.1
-        });
+        // WARNA LAPISAN ANATOMI (Biar Jelas Bedanya)
+        const matOtotLenganAtas = new THREE.MeshStandardMaterial({ color: 0x990000, roughness: 0.6 }); // Otot Merah Tebal
+        const matOtotLenganBawah = new THREE.MeshStandardMaterial({ color: 0xcc3333, roughness: 0.5 }); // Otot Lengan Bawah
+        const matTelapakKulit = new THREE.MeshStandardMaterial({ color: 0xD2B48C, roughness: 0.7 });   // Lapisan Kulit luar awal
 
-        // 2. Geometri Otot Bersegmen (Lebar, Tinggi, Panjang, Segmen_Panjang)
-        // Kita beri 8 segmen di sepanjang lengan agar saat ditekuk di bagian siku tidak patah kaku
-        const geoOtotLengan = new THREE.CylinderGeometry(0.03, 0.04, 0.4, 8, 8); 
-        // Putar geometri silinder agar menghadap ke depan (Z-axis)
-        geoOtotLengan.rotateX(Math.PI / 2);
+        // ==========================================
+        // FUNGSI UNTUK MEMBUAT SATU LENGAN LENGKAP
+        // ==========================================
+        function buatLenganAnatomi(isKanan) {
+            const grupLengan = new THREE.Group();
+            const sisi = isKanan ? 1 : -1;
 
-        // --- PEMBUATAN STRUKTUR LENGAN KANAN ---
-        const lenganKananMesh = new THREE.SkinnedMesh(geoOtotLengan, matTanganPro);
+            // 1. TULANG / KERANGKA PUSAT (Hierarki Sendi)
+            const pangkalBahu = new THREE.Group();
+            const sendiSiku = new THREE.Group();
+            const sendiPergelangan = new THREE.Group();
 
-        // 3. Menghubungkan ke Sistem Kerangka (Bones)
-        const tulangBahu = new THREE.Bone();
-        const tulangSiku = new THREE.Bone();
-        const tulangPergelangan = new THREE.Bone();
+            // Hubungkan Rantai Tulang Kerangka
+            pangkalBahu.add(sendiSiku);
+            sendiSiku.add(sendiPergelangan);
 
-        // Sambungkan rantai tulang (Bahu -> Siku -> Pergelangan)
-        tulangBahu.add(tulangSiku);
-        tulangSiku.add(tulangPergelangan);
+            // Atur Jarak Antar Panjang Tulang Kerangka (Meter)
+            sendiSiku.position.set(0, -0.05, -0.18);          // Panjang tulang lengan atas
+            sendiPergelangan.position.set(0, -0.02, -0.16);  // Panjang tulang lengan bawah
 
-        // Atur posisi sendi tulang (Siku berada 0.2 meter di depan bahu)
-        tulangSiku.position.z = -0.2;
-        tulangPergelangan.position.z = -0.2;
+            // 2. LAPISAN OTOT LENGAN ATAS (Bahu ke Siku) - Bentuk Silinder Tebal
+            const geoOtotAtas = new THREE.CylinderGeometry(0.028, 0.035, 0.18, 8);
+            geoOtotAtas.rotateX(Math.PI / 2); // Rebahkan silinder mengikuti arah tulang
+            const ototAtasMesh = new THREE.Mesh(geoOtotAtas, matOtotLenganAtas);
+            ototAtasMesh.position.set(0, -0.025, -0.09); // Posisikan di tengah antara bahu & siku
+            pangkalBahu.add(ototAtasMesh);
 
-        // Satukan tulang menjadi satu kesatuan Kerangka (Skeleton)
-        const kerangkaKanan = new THREE.Skeleton([tulangBahu, tulangSiku, tulangPergelangan]);
-        lenganKananMesh.add(tulangBahu);
-        lenganKananMesh.bind(kerangkaKanan);
+            // 3. LAPISAN OTOT LENGAN BAWAH (Siku ke Pergelangan) - Mengecil ke Ujung
+            const geoOtotBawah = new THREE.CylinderGeometry(0.022, 0.032, 0.16, 8);
+            geoOtotBawah.rotateX(Math.PI / 2);
+            const ototBawahMesh = new THREE.Mesh(geoOtotBawah, matOtotLenganBawah);
+            ototBawahMesh.position.set(0, -0.01, -0.08); // Posisikan di tengah lengan bawah
+            sendiSiku.add(ototBawahMesh);
 
-        // Atur posisi lengan kanan di depan kamera
-        lenganKananMesh.position.set(0.12, -0.15, -0.3);
-        grupTangan.add(lenganKananMesh);
+            // 4. LAPISAN TELAPAK & JARI AWAL (Di Pergelangan)
+            const geoTelapak = new THREE.BoxGeometry(0.05, 0.02, 0.07);
+            const telapakMesh = new THREE.Mesh(geoTelapak, matTelapakKulit);
+            telapakMesh.position.set(0, 0, -0.035);
+            sendiPergelangan.add(telapakMesh);
 
-        // Pasang grup ke kamera
+            // Simpan referensi sendi ke grup luar agar bisa digerakkan lewat animasi nanti
+            grupLengan.userData = {
+                siku: sendiSiku,
+                pergelangan: sendiPergelangan
+            };
+
+            grupLengan.add(pangkalBahu);
+            
+            // Atur Posisi Letak Lengan Kiri / Kanan di Depan Kamera Layar HP
+            grupLengan.position.set(0.13 * sisi, -0.14, -0.28);
+            // Rotasi awal agar lengan menekuk masuk ke dalam arah tengah layar
+            grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
+
+            return grupLengan;
+           
+        }
+
+        // Cetak sepasang lengan ke dalam game
+        const lenganKanan = buatLenganAnatomi(true);
+        const lenganKiri = buatLenganAnatomi(false);
+
+        grupTangan.add(lenganKanan);
+        grupTangan.add(lenganKiri);
+
         camera.add(grupTangan);
         scene.add(camera);
 
-        // Taruh variabel tulang di global agar nanti bisa kita gerakkan di Game Loop
-        window.sikuKanan = tulangSiku;
-        window.pergelanganKanan = tulangPergelangan;
+        // Pasang referensi global untuk dianimasikan menekuk di fungsi animate()
+        window.sikuKanan = lenganKanan.userData.siku;
+        window.sikuKiri = lenganKiri.userData.siku;
+
 
 
 
