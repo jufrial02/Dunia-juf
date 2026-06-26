@@ -47,27 +47,28 @@
         rumah.position.set(0, 2, -5); 
         scene.add(rumah);
 
-        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA (UKURAN BESAR UNTUK TES) ---
+        // --- 3. MENCIPTAKAN TANGAN KARAKTER PRIA (UKURAN RAMPING PRO) ---
         const grupTangan = new THREE.Group(); 
         
         const matKulitPria = new THREE.MeshBasicMaterial({ color: 0xD2B48C }); 
-        // Kita perbesar ukurannya (lebar 0.3, tinggi 0.3, panjang 1.5 meter)
-        const geoLengan = new THREE.BoxGeometry(0.3, 0.3, 1.5); 
+        // Kita kecilkan ukurannya agar proporsional (lebar 0.07, tinggi 0.07, panjang 0.4)
+        const geoLengan = new THREE.BoxGeometry(0.07, 0.07, 0.4); 
 
-        // Tangan Kiri (Ditaruh agak tengah dan dimajukan 1.5 meter di depan mata)
+        // Tangan Kiri (Digeser agak ke dalam agar tidak terlalu di pinggir layar)
         const lenganKiri = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKiri.position.set(-0.4, -0.2, -1.5); 
-        lenganKiri.rotation.set(0.1, 0.1, 0); 
+        lenganKiri.position.set(-0.16, -0.15, -0.35); 
+        lenganKiri.rotation.set(0.2, 0.4, -0.1); // Sudut ditekuk ke arah tengah
         grupTangan.add(lenganKiri);
 
-        // Tangan Kanan (Ditaruh agak tengah dan dimajukan 1.5 meter di depan mata)
+        // Tangan Kanan (Digeser agak ke dalam agar tidak terlalu di pinggir layar)
         const lenganKanan = new THREE.Mesh(geoLengan, matKulitPria);
-        lenganKanan.position.set(0.4, -0.2, -1.5); 
-        lenganKanan.rotation.set(0.1, -0.1, 0); 
+        lenganKanan.position.set(0.16, -0.15, -0.35); 
+        lenganKanan.rotation.set(0.2, -0.4, 0.1); // Sudut ditekuk ke arah tengah
         grupTangan.add(lenganKanan);
 
         camera.add(grupTangan);
         scene.add(camera);
+
 
 
                 // --- 4. KONTROL SENTUH ---
