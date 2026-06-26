@@ -50,7 +50,20 @@ const torso=new THREE.Mesh(
 );
 torso.position.set(0,1.1,0);
 player.add(torso);
+// =======================
+// KEPALA
+// =======================
+const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.14, 32, 32),
+    new THREE.MeshStandardMaterial({
+        color: 0xD2B48C
+    })
+);
 
+head.position.set(0, 1.55, 0);
+
+player.add(head);
+ 
 const house=new THREE.Mesh(
  new THREE.BoxGeometry(3,3,3),
  new THREE.MeshStandardMaterial({color:0x8B4513})
