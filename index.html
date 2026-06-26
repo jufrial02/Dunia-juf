@@ -175,19 +175,21 @@
             }
         });
 
-        // --- 5. GAME LOOP SINGLE & AMAN ---
+        // --- 5. GAME LOOP DENGAN GERAKAN OTOT & SENDI SIKU TEPAT ---
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
         function animate() {
             requestAnimationFrame(animate);
 
+            // Pergerakan kamera untuk melihat sekeliling
             const targetRotasiKamera = new THREE.Quaternion();
             targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
             camera.quaternion.slerp(targetRotasiKamera, 0.2);
 
+            // Cek jika layar sedang disentuh untuk berjalan
             if (sentuhan.kiriId !== null) {
-                waktuAyunan += 0.12; 
+                waktuAyunan += 0.14; // Kecepatan ayunan otot saat jalan cepat
                 const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
                 const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
                 const totalDist = Math.sqrt(dX*dX + dY*dY);
@@ -202,17 +204,33 @@
                     camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
                 }
             } else {
+                // Efek napas pelan (otot naik turun sedikit saat diam)
                 waktuAyunan += 0.02; 
             }
 
-            // Efek Ayunan Tangan Tes Ukuran Besar
-            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.02;
-            grupTangan.position.x = Math.cos(waktuAyunan) * 0.01;
+            // 1. AYUNAN PANGKAL BAHU (Membuat seluruh lengan bergerak naik turun & maju mundur)
+            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
+            grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
+
+            // 2. LOGIKA TEKUKAN SENDI SIKU & OTOT BAWAH
+            if (window.sikuKanan && window.sikuKiri) {
+                // Siku ditekuk konstan ke atas (sudut dasar) + efek kontraksi otot pas jalan
+                const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.04;
+                
+                // Nilai -0.6 rad melambangkan siku yang menekuk membentuk sudut alami
+                window.sikuKanan.rotation.x = -0.6 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -0.6 + efekTekukJalan;
+
+                // Membawa arah lengan bawah sedikit masuk menghadap ke titik tengah (crosshair)
+                window.sikuKanan.rotation.y = -0.15;
+                window.sikuKiri.rotation.y = 0.15;
+            }
 
             renderer.render(scene, camera);
         }
         animate();
 
+        // --- 6. ADJUST SCREEN SIZE ---
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -221,3 +239,4 @@
     </script>
 </body>
 </html>
+
