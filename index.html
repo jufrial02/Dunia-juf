@@ -3,48 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dunia Juf 3D</title>
-    <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #000; user-select: none; }
-        canvas { display: block; width: 100vw; height: 100vh; }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
-            background-color: rgba(255, 255, 255, 0.5); border-radius: 50%;
-            transform: translate(-50%, -50%); pointer-events: none;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-</head>
-<body>
-
-    <div id="crosshair"></div>
-
-    <script>
-        // --- 1. SETUP DUNIA 3D ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); 
-
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
-        camera.position.set(0, 2, 5); 
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const cahayaSemesta = new THREE.AmbientLight(0xffffff, 1.5);
-        scene.add(cahayaSemesta);
-
-            // 2. LOGIKA TEKUKAN SENDI SIKU & OTOT BAWAH (DIANGKAT KE ATAS)
-            if (window.sikuKanan && window.sikuKiri) {
-                // Efek kontraksi otot saat berjalan
-                const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
-                
-                // Nilai diubah dari -0.6 menjadi -1.2 agar lengan bawah menekuk tajam ke atas (terlihat di layar)
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dunia Juf</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #87CEEB; user-select: none; touch-action: none; }
@@ -56,7 +14,6 @@
             pointer-events: none; opacity: 0.7;
         }
     </style>
-    <!-- Memuat Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -64,18 +21,17 @@
     <div id="crosshair"></div>
 
     <script>
-        // --- 1. SETUP INVESTASI DUNIA 3D (SCENE, CAMERA, RENDERER) ---
+        // --- 1. SETUP DUNIA 3D (SCENE, CAMERA, RENDERER) ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Langit Biru
+        scene.background = new THREE.Color(0x87CEEB); 
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.6, 5); // Tinggi mata manusia normal (1.6 meter)
+        camera.position.set(0, 1.6, 5); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Pencahayaan agar otot dan bayangan tangan terlihat jelas
         const cahayaMatahari = new THREE.DirectionalLight(0xffffff, 1.0);
         cahayaMatahari.position.set(5, 10, 5);
         scene.add(cahayaMatahari);
@@ -85,18 +41,18 @@
 
         // --- 2. LINGKUNGAN (TANAH & RUMAH COKELAT) ---
         const geoTanah = new THREE.PlaneGeometry(100, 100);
-        const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 }); // Rumput Hijau
+        const matTanah = new THREE.MeshBasicMaterial({ color: 0x4CAF50 }); 
         const tanah = new THREE.Mesh(geoTanah, matTanah);
         tanah.rotation.x = -Math.PI / 2;
         scene.add(tanah);
 
         const geoRumah = new THREE.BoxGeometry(3, 3, 3);
-        const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Rumah Cokelat
+        const matRumah = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); 
         const rumah = new THREE.Mesh(geoRumah, matRumah);
         rumah.position.set(0, 1.5, -2);
         scene.add(rumah);
 
-        // --- 3. ANATOMI DETAIL KERANGKA & OTOT TANGAN (KANAN & KIRI) ---
+        // --- 3. ANATOMI DETAIL KERANGKA & OTOT TANGAN ---
         const grupTangan = new THREE.Group();
 
         const matOtotLenganAtas = new THREE.MeshStandardMaterial({ color: 0x990000, roughness: 0.6 }); 
@@ -140,7 +96,9 @@
             };
 
             grupLengan.add(pangkalBahu);
-            grupLengan.position.set(0.13 * sisi, -0.14, -0.28);
+            
+            // Posisi dirapatkan ke tengah (0.08) agar masuk frame portrait HP
+            grupLengan.position.set(0.08 * sisi, -0.12, -0.25);
             grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
 
             return grupLengan;
@@ -155,7 +113,6 @@
         camera.add(grupTangan);
         scene.add(camera);
 
-        // PENEMPATAN DAFTAR SENDI GLOBAL
         window.sikuKanan = lenganKanan.userData.siku;
         window.sikuKiri = lenganKiri.userData.siku;
         window.pergelanganKanan = lenganKanan.userData.pergelangan;
@@ -213,7 +170,7 @@
             }
         });
 
-        // --- 5. GAME LOOP DENGAN GERAKAN OTOT & SENDI SIKU TEPAT ---
+        // --- 5. GAME LOOP ---
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
@@ -243,23 +200,22 @@
                 waktuAyunan += 0.02; 
             }
 
-            // Ayunan Lengan Utama
             grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
             grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
 
-            // LOGIKA MENEKUK JURUSAN SIKU KE ATAS LAYAR HP
+            // PENYETELAN TEKUKAN SIKU AGAR MENDONGAK KE ATAS LAYAR
             if (window.sikuKanan && window.sikuKiri) {
                 const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
                 
-                // Menaikkan sudut siku tajam ke atas (-1.2) agar bagian lengan depan terlihat
-                window.sikuKanan.rotation.x = -1.2 + efekTekukJalan;
-                window.sikuKiri.rotation.x = -1.2 + efekTekukJalan;
+                // Menaikkan sudut siku tajam ke atas (-1.8) agar bagian depan tangan kelihatan
+                window.sikuKanan.rotation.x = -1.8 + efekTekukJalan;
+                window.sikuKiri.rotation.x = -1.8 + efekTekukJalan;
 
-                window.sikuKanan.rotation.y = -0.3;
-                window.sikuKiri.rotation.y = 0.3;
+                window.sikuKanan.rotation.y = -0.4;
+                window.sikuKiri.rotation.y = 0.4;
                 
-                window.sikuKanan.rotation.z = -0.2;
-                window.sikuKiri.rotation.z = 0.2;
+                window.sikuKanan.rotation.z = -0.3;
+                window.sikuKiri.rotation.z = 0.3;
             }
 
             renderer.render(scene, camera);
@@ -275,143 +231,3 @@
     </script>
 </body>
 </html>
-
-            grupLengan.add(pangkalBahu);
-            
-            // Atur Posisi Letak Lengan Kiri / Kanan di Depan Kamera Layar HP
-            grupLengan.position.set(0.13 * sisi, -0.14, -0.28);
-            // Rotasi awal agar lengan menekuk masuk ke dalam arah tengah layar
-            grupLengan.rotation.set(0.1, -0.3 * sisi, 0.0);
-
-            return grupLengan;
-           
-        }
-
-        // Cetak sepasang lengan ke dalam game
-        const lenganKanan = buatLenganAnatomi(true);
-        const lenganKiri = buatLenganAnatomi(false);
-
-        grupTangan.add(lenganKanan);
-        grupTangan.add(lenganKiri);
-
-        camera.add(grupTangan);
-        scene.add(camera);
-
-        // Pasang referensi global untuk dianimasikan menekuk di fungsi animate()
-        window.sikuKanan = lenganKanan.userData.siku;
-        window.sikuKiri = lenganKiri.userData.siku;
-
-
-
-
-                // --- 4. KONTROL SENTUH ---
-        let sudutPandangX = 0;
-        let sudutPandangY = 0;
-        const sentuhan = {
-            kiriId: null, kiriStart: {x: 0, y: 0}, kiriMove: {x: 0, y: 0},
-            kananId: null, kananStart: {x: 0, y: 0}, kananMove: {x: 0, y: 0}
-        };
-
-        window.addEventListener('touchstart', (e) => {
-            for(let i = 0; i < e.changedTouches.length; i++) {
-                const touch = e.changedTouches[i];
-                if (touch.clientX < window.innerWidth / 2 && sentuhan.kiriId === null) {
-                    sentuhan.kiriId = touch.identifier;
-                    sentuhan.kiriStart.x = touch.clientX; sentuhan.kiriStart.y = touch.clientY;
-                    sentuhan.kiriMove.x = touch.clientX; sentuhan.kiriMove.y = touch.clientY;
-                } else if (touch.clientX >= window.innerWidth / 2 && sentuhan.kananId === null) {
-                    sentuhan.kananId = touch.identifier;
-                    sentuhan.kananStart.x = touch.clientX; sentuhan.kananStart.y = touch.clientY;
-                }
-            }
-        });
-
-        window.addEventListener('touchmove', (e) => {
-            for(let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                if (touch.identifier === sentuhan.kiriId) {
-                    sentuhan.kiriMove.x = touch.clientX; sentuhan.kiriMove.y = touch.clientY;
-                } else if (touch.identifier === sentuhan.kananId) {
-                    const deltaX = touch.clientX - sentuhan.kananStart.x;
-                    const deltaY = touch.clientY - sentuhan.kananStart.y;
-                    sudutPandangX -= deltaX * 0.005;
-                    sudutPandangY -= deltaY * 0.005;
-                    sudutPandangY = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, sudutPandangY));
-                    sentuhan.kananStart.x = touch.clientX; sentuhan.kananStart.y = touch.clientY;
-                }
-            }
-        });
-
-        window.addEventListener('touchend', (e) => {
-            for(let i = 0; i < e.changedTouches.length; i++) {
-                const touch = e.changedTouches[i];
-                if (touch.identifier === sentuhan.kiriId) { sentuhan.kiriId = null; }
-                else if (touch.identifier === sentuhan.kananId) { sentuhan.kananId = null; }
-            }
-        });
-
-        // --- 5. GAME LOOP DENGAN GERAKAN OTOT & SENDI SIKU TEPAT ---
-        const kecepatanJalan = 0.08;
-        let waktuAyunan = 0; 
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Pergerakan kamera untuk melihat sekeliling
-            const targetRotasiKamera = new THREE.Quaternion();
-            targetRotasiKamera.setFromEuler(new THREE.Euler(sudutPandangY, sudutPandangX, 0, 'YXZ'));
-            camera.quaternion.slerp(targetRotasiKamera, 0.2);
-
-            // Cek jika layar sedang disentuh untuk berjalan
-            if (sentuhan.kiriId !== null) {
-                waktuAyunan += 0.14; // Kecepatan ayunan otot saat jalan cepat
-                const dX = sentuhan.kiriMove.x - sentuhan.kiriStart.x;
-                const dY = sentuhan.kiriMove.y - sentuhan.kiriStart.y;
-                const totalDist = Math.sqrt(dX*dX + dY*dY);
-
-                if (totalDist > 10) {
-                    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-                    forward.y = 0; forward.normalize();
-                    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-                    right.y = 0; right.normalize();
-
-                    camera.position.addScaledVector(forward, (-dY / totalDist) * kecepatanJalan);
-                    camera.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
-                }
-            } else {
-                // Efek napas pelan (otot naik turun sedikit saat diam)
-                waktuAyunan += 0.02; 
-            }
-
-            // 1. AYUNAN PANGKAL BAHU (Membuat seluruh lengan bergerak naik turun & maju mundur)
-            grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
-            grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
-
-            // 2. LOGIKA TEKUKAN SENDI SIKU & OTOT BAWAH
-            if (window.sikuKanan && window.sikuKiri) {
-                // Siku ditekuk konstan ke atas (sudut dasar) + efek kontraksi otot pas jalan
-                const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.04;
-                
-                // Nilai -0.6 rad melambangkan siku yang menekuk membentuk sudut alami
-                window.sikuKanan.rotation.x = -0.6 + efekTekukJalan;
-                window.sikuKiri.rotation.x = -0.6 + efekTekukJalan;
-
-                // Membawa arah lengan bawah sedikit masuk menghadap ke titik tengah (crosshair)
-                window.sikuKanan.rotation.y = -0.15;
-                window.sikuKiri.rotation.y = 0.15;
-            }
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // --- 6. ADJUST SCREEN SIZE ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
-
