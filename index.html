@@ -14,7 +14,7 @@
             pointer-events: none; opacity: 0.7;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 </head>
 <body>
 
@@ -263,6 +263,7 @@ player.position.addScaledVector(right, (dX / totalDist) * kecepatanJalan);
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-    </script>
+    <script type="module">
+        import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.128/build/three.module.js";
 </body>
 </html>
