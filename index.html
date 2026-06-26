@@ -174,7 +174,7 @@
         const kecepatanJalan = 0.08;
         let waktuAyunan = 0; 
 
-        function animate() {
+                function animate() {
             requestAnimationFrame(animate);
 
             const targetRotasiKamera = new THREE.Quaternion();
@@ -200,14 +200,15 @@
                 waktuAyunan += 0.02; 
             }
 
+            // Ayunan Lengan Utama
             grupTangan.position.y = Math.sin(waktuAyunan * 2) * 0.006;
             grupTangan.position.x = Math.cos(waktuAyunan) * 0.003;
 
-            // PENYETELAN TEKUKAN SIKU AGAR MENDONGAK KE ATAS LAYAR
+            // LOGIKA MENEKUK JURUSAN SIKU KE ATAS LAYAR HP
             if (window.sikuKanan && window.sikuKiri) {
                 const efekTekukJalan = Math.sin(waktuAyunan * 2) * 0.05;
                 
-                // Menaikkan sudut siku tajam ke atas (-1.8) agar bagian depan tangan kelihatan
+                // Menaikkan sudut siku tajam ke atas
                 window.sikuKanan.rotation.x = -1.8 + efekTekukJalan;
                 window.sikuKiri.rotation.x = -1.8 + efekTekukJalan;
 
@@ -216,11 +217,16 @@
                 
                 window.sikuKanan.rotation.z = -0.3;
                 window.sikuKiri.rotation.z = 0.3;
+
+                // KODE BARU: Meluruskan pergelangan tangan agar kulit sawo matang muncul
+                window.pergelanganKanan.rotation.x = 0.8;
+                window.pergelanganKiri.rotation.x = 0.8;
             }
 
             renderer.render(scene, camera);
         }
         animate();
+
 
         // --- 6. ADJUST SCREEN SIZE ---
         window.addEventListener('resize', () => {
