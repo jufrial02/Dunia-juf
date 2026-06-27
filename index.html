@@ -44,20 +44,21 @@
     scene.add(rumahUtama);
 
 
-        const rumahGeo = new THREE.BoxGeometry(2, 2, 2);
-        const rumahMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-        const rumah = new THREE.Mesh(rumahGeo, rumahMat);
-        rumah.position.set(0, 1, -5);
-        scene.add(rumah);
-
-        // 4. PANGGIL MODEL MANUSIA UTUH
-        const manusia = buatKarakterManusia();
+                const manusia = buatKarakterManusia();
         scene.add(manusia);
 
-        // Kamera ditempatkan sebagai mata karakter
         manusia.position.set(0, 0, 0);
-        camera.position.set(0, 1.4, 0); 
+        
+        // Kamera dimajukan sedikit (Z = -0.05) agar pas di depan dada/mata player
+        camera.position.set(0, 1.5, -0.05); 
         manusia.add(camera); 
+
+        // Dorong posisi tangan ke depan dada agar selalu terlihat di layar HP
+        if (manusia.userData.lenganKiri && manusia.userData.lenganKanan) {
+            manusia.userData.lenganKiri.position.set(-0.25, 1.15, -0.2);
+            manusia.userData.lenganKanan.position.set(0.25, 1.15, -0.2);
+        }
+
 
         // 5. KONTROL SENTUHAN HP (Look & Move)
         let isTouching = false;
