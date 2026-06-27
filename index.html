@@ -10,32 +10,39 @@
     </style>
 </head>
 <body>
-    <script type="module">
-        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-        import { buatKarakterManusia } from './js/human_model/human_model.js';
+<script type="module">
+    import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+    import { buatKarakterManusia } from './js/human_model/human_model.js';
+    import { buatRumah } from './js/human_model/environment/house.js'; // Rumah masuk di sini
 
-        // 1. SETUP SCENE & CAMERA
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x7ec0ee);
+    // 1. SETUP SCENE & CAMERA
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x7ec0ee);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-        // 2. LIGHTING (CAHAYA)
-        const light = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(light);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(5, 10, 7);
-        scene.add(dirLight);
+    // 2. LIGHTING (CAHAYA)
+    const light = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(light);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
 
-        // 3. TANAH & OBJEK RUMAH COKELAT
-        const floorGeo = new THREE.PlaneGeometry(100, 100);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x556b2f });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        scene.add(floor);
+    // 3. TANAH SEMENTARA
+    const floorGeo = new THREE.PlaneGeometry(100, 100);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x556b2f });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    scene.add(floor);
+
+    // RUMAH BARU KAMU BERDIRI DI SINI:
+    const rumahUtama = buatRumah();
+    rumahUtama.position.set(0, 0, -6); 
+    scene.add(rumahUtama);
+
 
         const rumahGeo = new THREE.BoxGeometry(2, 2, 2);
         const rumahMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
