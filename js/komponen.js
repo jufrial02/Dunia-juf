@@ -1,5 +1,5 @@
-// FUNGSI UNTUK MEMBUAT POHON MODULAR (Bisa dipanggil di index.html)
-function buatPohon() {
+// WAJIB ADA KATA EXPORT DI DEPANNYA AGAR BISA DIIMPORT DI INDEX
+export function buatPohon() {
     const grupPohon = new THREE.Group();
 
     // 1. Batang Pohon
@@ -27,4 +27,3 @@ function buatPohon() {
 
     return grupPohon;
 }
-
