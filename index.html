@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
+        <script src="js/komponen.js"></script>
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -43,6 +45,11 @@
     rumahUtama.position.set(0, 0, -6); 
     scene.add(rumahUtama);
 
+    // MENANAM POHON DARI FILE JS/KOMPONEN.JS
+const pohon1 = buatPohon(); pohon1.position.set(-4, 0, -8); scene.add(pohon1);
+const pohon2 = buatPohon(); pohon2.position.set(4, 0, -7);  scene.add(pohon2);
+const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
+    
 
                 const manusia = buatKarakterManusia();
         scene.add(manusia);
