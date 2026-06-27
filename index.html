@@ -60,49 +60,70 @@
         }
 
 
-        // 5. KONTROL SENTUHAN (Kiri = Jalan, Kanan = Nengok ala COD)
-        let isTouching = false;
-        let previousTouchX = 0, previousTouchY = 0;
+        // 5. KONTROL MULTI-TOUCH HP (Bisa Jalan + Nengok Bersamaan ala COD)
         let rotasiY = 0, rotasiX = 0;
         let jalan = false; 
         let waktu = 0;
+        
+        let touchJalanId = null;
+        let touchKameraId = null;
+        let previousTouchX = 0, previousTouchY = 0;
 
         window.addEventListener('touchstart', (e) => {
-            isTouching = true;
-            previousTouchX = e.touches[0].clientX;
-            previousTouchY = e.touches[0].clientY;
-
-            // JALAN MAJU: Hanya aktif kalau menyentuh layar sebelah kiri (kurang dari setengah lebar layar)
-            if (e.touches[0].clientX < window.innerWidth / 2) {
-                jalan = true;
+            // Periksa setiap jari yang baru menempel di layar
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                
+                // Jari di sebelah KIRI layar = JALAN
+                if (touch.clientX < window.innerWidth / 2 && touchJalanId === null) {
+                    touchJalanId = touch.identifier;
+                    jalan = true;
+                } 
+                // Jari di sebelah KANAN layar = KAMERA
+                else if (touch.clientX >= window.innerWidth / 2 && touchKameraId === null) {
+                    touchKameraId = touch.identifier;
+                    previousTouchX = touch.clientX;
+                    previousTouchY = touch.clientY;
+                }
             }
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (!isTouching) return;
-            
-            // PANDANGAN KAMERA: Hanya aktif kalau menggeser di layar sebelah kanan (lebih dari setengah lebar layar)
-            if (e.touches[0].clientX > window.innerWidth / 2) {
-                const deltaX = e.touches[0].clientX - previousTouchX;
-                const deltaY = e.touches[0].clientY - previousTouchY;
+            // Periksa jari mana yang sedang bergerak
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
                 
-                rotasiY -= deltaX * 0.002; // Sensitivitas kamera dibuat mulus
-                rotasiX -= deltaY * 0.002;
-                
-                // Batasi sudut pandang atas/bawah agar tidak pusing
-                rotasiX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotasiX));
-                
-                manusia.rotation.y = rotasiY;
-                camera.rotation.x = rotasiX;
+                // Jika jari yang bergerak adalah jari kamera (Kanan)
+                if (touch.identifier === touchKameraId) {
+                    const deltaX = touch.clientX - previousTouchX;
+                    const deltaY = touch.clientY - previousTouchY;
+                    
+                    rotasiY -= deltaX * 0.002; // Sensitivitas kamera
+                    rotasiX -= deltaY * 0.002;
+                    rotasiX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotasiX));
+                    
+                    manusia.rotation.y = rotasiY;
+                    camera.rotation.x = rotasiX;
+                    
+                    previousTouchX = touch.clientX;
+                    previousTouchY = touch.clientY;
+                }
             }
-
-            previousTouchX = e.touches[0].clientX;
-            previousTouchY = e.touches[0].clientY;
         });
 
-        window.addEventListener('touchend', () => {
-            isTouching = false;
-            jalan = false; // Angkat jempol = otomatis berhenti jalan
+        window.addEventListener('touchend', (e) => {
+            // Periksa jari mana yang diangkat dari layar
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                
+                if (touch.identifier === touchJalanId) {
+                    touchJalanId = null;
+                    jalan = false; // Berhenti jalan jika jempol kiri diangkat
+                }
+                if (touch.identifier === touchKameraId) {
+                    touchKameraId = null;
+                }
+            }
         });
 
         // 6. ANIMATION LOOP (Gerak & Ayunan Tangan)
@@ -110,10 +131,10 @@
             requestAnimationFrame(animate);
 
             if (jalan) {
-                manusia.translateZ(-0.04); // Jalankan karakter maju
-                waktu += 0.15; // Ayunan tangan saat jalan
+                manusia.translateZ(-0.04); // Kecepatan jalan maju
+                waktu += 0.15;
             } else {
-                waktu += 0.02; // Ayunan halus saat diam (efek bernapas)
+                waktu += 0.02;
             }
 
             if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
