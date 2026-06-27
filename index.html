@@ -60,30 +60,41 @@
         }
 
 
-        // 5. KONTROL SENTUHAN HP (Look & Move)
+        // 5. KONTROL SENTUHAN (Kiri = Jalan, Kanan = Nengok ala COD)
         let isTouching = false;
         let previousTouchX = 0, previousTouchY = 0;
         let rotasiY = 0, rotasiX = 0;
-        let kecepatanJalan = 0;
+        let jalan = false; 
+        let waktu = 0;
 
         window.addEventListener('touchstart', (e) => {
             isTouching = true;
             previousTouchX = e.touches[0].clientX;
             previousTouchY = e.touches[0].clientY;
-            kecepatanJalan = 0.05; // Mulai jalan maju saat layar disentuh
+
+            // JALAN MAJU: Hanya aktif kalau menyentuh layar sebelah kiri (kurang dari setengah lebar layar)
+            if (e.touches[0].clientX < window.innerWidth / 2) {
+                jalan = true;
+            }
         });
 
         window.addEventListener('touchmove', (e) => {
             if (!isTouching) return;
-            const deltaX = e.touches[0].clientX - previousTouchX;
-            const deltaY = e.touches[0].clientY - previousTouchY;
-
-            rotasiY -= deltaX * 0.005;
-            rotasiX -= deltaY * 0.005;
-            rotasiX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotasiX));
-
-            manusia.rotation.y = rotasiY;
-            camera.rotation.x = rotasiX;
+            
+            // PANDANGAN KAMERA: Hanya aktif kalau menggeser di layar sebelah kanan (lebih dari setengah lebar layar)
+            if (e.touches[0].clientX > window.innerWidth / 2) {
+                const deltaX = e.touches[0].clientX - previousTouchX;
+                const deltaY = e.touches[0].clientY - previousTouchY;
+                
+                rotasiY -= deltaX * 0.002; // Sensitivitas kamera dibuat mulus
+                rotasiX -= deltaY * 0.002;
+                
+                // Batasi sudut pandang atas/bawah agar tidak pusing
+                rotasiX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotasiX));
+                
+                manusia.rotation.y = rotasiY;
+                camera.rotation.x = rotasiX;
+            }
 
             previousTouchX = e.touches[0].clientX;
             previousTouchY = e.touches[0].clientY;
@@ -91,25 +102,22 @@
 
         window.addEventListener('touchend', () => {
             isTouching = false;
-            kecepatanJalan = 0; // Berhenti jalan saat sentuhan dilepas
+            jalan = false; // Angkat jempol = otomatis berhenti jalan
         });
 
-        // 6. ANIMATION LOOP (Gerak & Render)
-        let waktu = 0;
+        // 6. ANIMATION LOOP (Gerak & Ayunan Tangan)
         function animate() {
             requestAnimationFrame(animate);
 
-            // Sistem gerak maju sesuai arah hadap kamera
-            if (kecepatanJalan > 0) {
-                manusia.translateZ(-kecepatanJalan);
-                waktu += 0.15;
+            if (jalan) {
+                manusia.translateZ(-0.04); // Jalankan karakter maju
+                waktu += 0.15; // Ayunan tangan saat jalan
             } else {
-                waktu += 0.02; // Animasi napas pelan saat diam
+                waktu += 0.02; // Ayunan halus saat diam (efek bernapas)
             }
 
-            // Animasi ayunan lengan otomatis saat bergerak/diam (Bobbing)
             if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
-                const ayunan = Math.sin(waktu) * (kecepatanJalan > 0 ? 0.3 : 0.03);
+                const ayunan = Math.sin(waktu) * (jalan ? 0.2 : 0.02);
                 manusia.userData.lenganKanan.rotation.x = 0.1 + ayunan;
                 manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
             }
