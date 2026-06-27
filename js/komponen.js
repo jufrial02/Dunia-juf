@@ -1,4 +1,5 @@
-// WAJIB ADA KATA EXPORT DI DEPANNYA AGAR BISA DIIMPORT DI INDEX
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+
 export function buatPohon() {
     const grupPohon = new THREE.Group();
 
