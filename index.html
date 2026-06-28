@@ -7,9 +7,27 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #7ec0ee; touch-action: none; }
         canvas { display: block; }
+                #tombolPintu {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none; /* Sembunyi dulu, baru muncul kalau dekat pintu */
+            z-index: 10;
+                }
+        
     </style>
 </head>
 <body>
+    <button id="tombolPintu">BUKA PINTU</button>
+    
 <script type="module">
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 import { buatKarakterManusia } from './js/human_model/human_model.js';
@@ -70,6 +88,30 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         // 5. KONTROL MULTI-TOUCH HP (Bisa Jalan + Nengok Bersamaan ala COD)
         let rotasiY = 0, rotasiX = 0;
         let jalan = false; 
+            // PENGATURAN PINTU UTAMA
+        let engselPintu = new THREE.Group();
+        let pintuTerbuka = false;
+        let dekatPintu = false;
+
+        // Membuat daun pintu (posisi relatif terhadap engsel di sisi kiri pintu)
+        const pintuGeo = new THREE.BoxGeometry(1.0, 2.0, 0.1);
+        const pintuMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Warna cokelat kayu
+        const daunPintu = new THREE.Mesh(pintuGeo, pintuMat);
+        daunPintu.position.x = 0.5; // Geser agar titik rotasi engsel pas di pinggir kiri
+        engselPintu.add(daunPintu);
+
+        // Pasang posisi engsel pintu tepat di depan rumah (Rumahmu di 0, 0, -6)
+        // Kita majukan sedikit ke depan rumah di koordinat (0, 0, -4.5)
+        engselPintu.position.set(-0.5, 0, -4.5); 
+        scene.add(engselPintu);
+
+        // Hubungkan tombol HP dengan fungsi rotasi pintu
+        const btnPintu = document.getElementById('tombolPintu');
+        btnPintu.addEventListener('touchstart', () => {
+            pintuTerbuka = !pintuTerbuka;
+            btnPintu.innerText = pintuTerbuka ? "TUTUP PINTU" : "BUKA PINTU";
+        });
+    
         let waktu = 0;
         
         let touchJalanId = null;
@@ -134,60 +176,102 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         });
 
         // 6. ANIMATION LOOP (Gerak & Ayunan Tangan)
-        function animate() {
-    requestAnimationFrame(animate);
+        // ====================================================
+        // PENGATURAN & TOMBOL PINTU OTOMATIS
+        // ====================================================
+        let engselPintu = new THREE.Group();
+        let pintuTerbuka = false;
 
-        // 1. Catat posisi lama karakter sebelum melangkah maju
-        const posisiLamaX = manusia.position.x;
-        const posisiLamaZ = manusia.position.z;
+        // Membuat daun pintu cokelat kayu
+        const pintuGeo = new THREE.BoxGeometry(1.2, 2.0, 0.1);
+        const pintuMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.7 });
+        const daunPintu = new THREE.Mesh(pintuGeo, pintuMat);
+        daunPintu.position.x = 0.6; // Titik rotasi pas di kiri
+        engselPintu.add(daunPintu);
 
+        // Pasang pintu tepat di depan rumah
+        engselPintu.position.set(-0.6, 0, -4.6); 
+        scene.add(engselPintu);
 
-    if (jalan) {
-        manusia.translateZ(-0.04); // Kecepatan jalan maju
-        waktu += 0.15;
-    } else {
-        waktu += 0.02;
-    }
+        // Buat tombol interaktif di HP Realme kamu
+        const btnPintu = document.createElement('button');
+        btnPintu.innerText = "BUKA PINTU";
+        btnPintu.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; background:rgba(0,0,0,0.8); color:white; border:2px solid white; border-radius:8px; font-size:16px; font-weight:bold; display:none; z-index:10;";
+        document.body.appendChild(btnPintu);
 
-        // 2. LOGIKA DETEKSI TABRAKAN (DIPADATKAN & ANTI-SUMBAT)
-        // Batas Rumah (Kita tebalkan radiusnya jadi 3.2 meter)
-        const posisiCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
-        if (posisiCekX.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
-            manusia.position.x = posisiLamaX; 
-        }
-        const posisiCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
-        if (posisiCekZ.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
-            manusia.position.z = posisiLamaZ; 
-        }
-
-        // Batas Pohon-Pohon (Kita tebalkan radiusnya jadi 1.2 meter)
-        const posisiPohon = [
-            new THREE.Vector3(-4, 0, -8),
-            new THREE.Vector3(4, 0, -7),
-            new THREE.Vector3(-5, 0, -4)
-        ];
-        
-        posisiPohon.forEach((pohon) => {
-            const pCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
-            if (pCekX.distanceTo(pohon) < 1.2) {
-                manusia.position.x = posisiLamaX;
-            }
-            const pCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
-            if (pCekZ.distanceTo(pohon) < 1.2) {
-                manusia.position.z = posisiLamaZ;
-            }
+        btnPintu.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            pintuTerbuka = !pintuTerbuka;
+            btnPintu.innerText = pintuTerbuka ? "TUTUP PINTU" : "BUKA PINTU";
         });
 
 
-    // 3. Animasi Ayunan Tangan
-    if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
-        const ayunan = Math.sin(waktu) * (jalan ? 0.2 : 0.02);
-        manusia.userData.lenganKanan.rotation.x = 0.1 + ayunan;
-        manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
-    }
+        // 6. ANIMATION LOOP
+        function animate() {
+            requestAnimationFrame(animate);
 
-                renderer.render(scene, camera);
-        } // <--- PASTIKAN ADA TANDA INI UNTUK MENUTUP ANIMATE
+            // Catat posisi lama untuk pengerem
+            const posisiLamaX = manusia.position.x;
+            const posisiLamaZ = manusia.position.z;
+
+            if (jalan) {
+                manusia.translateZ(-0.04);
+                waktu += 0.15;
+            } else {
+                waktu += 0.02;
+            }
+
+            // A. ANIMASI PINTU BERPUTAR MAJU/MUNDUR
+            const targetRotasi = pintuTerbuka ? -Math.PI / 2 : 0;
+            engselPintu.rotation.y += (targetRotasi - engselPintu.rotation.y) * 0.1;
+
+            // B. CEK JARAK MANUSIA KE PINTU
+            const jarakKePintu = manusia.position.distanceTo(new THREE.Vector3(0, 0, -4.6));
+            if (jarakKePintu < 2.0) {
+                btnPintu.style.display = "block";
+            } else {
+                btnPintu.style.display = "none";
+            }
+
+            // C. DETEKSI TABRAKAN RUMAH (Hanya ngerem kalau pintu TUTUP)
+            if (!pintuTerbuka) {
+                const posisiCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
+                if (posisiCekX.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
+                    manusia.position.x = posisiLamaX; 
+                }
+                const posisiCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
+                if (posisiCekZ.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
+                    manusia.position.z = posisiLamaZ; 
+                }
+            }
+
+            // D. DETEKSI TABRAKAN POHON
+            const posisiPohon = [
+                new THREE.Vector3(-4, 0, -8),
+                new THREE.Vector3(4, 0, -7),
+                new THREE.Vector3(-5, 0, -4)
+            ];
+            
+            posisiPohon.forEach((pohon) => {
+                const pCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
+                if (pCekX.distanceTo(pohon) < 1.2) {
+                    manusia.position.x = posisiLamaX;
+                }
+                const pCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
+                if (pCekZ.distanceTo(pohon) < 1.2) {
+                    manusia.position.z = posisiLamaZ;
+                }
+            });
+
+            // Animasi Ayunan Tangan
+            if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
+                const ayunan = Math.sin(waktu) * (jalan ? 0.2 : 0.02);
+                manusia.userData.lenganKanan.rotation.x = 0.1 + ayunan;
+                manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
+            }
+
+            renderer.render(scene, camera);
+        }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
