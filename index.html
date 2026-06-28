@@ -179,5 +179,16 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
     }
 
-    renderer.render(scene, camera);
-}
+                renderer.render(scene, camera);
+        } // <--- PASTIKAN ADA TANDA INI UNTUK MENUTUP ANIMATE
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
