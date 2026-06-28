@@ -85,10 +85,25 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         }
 
 
-        // 5. KONTROL MULTI-TOUCH HP (Bisa Jalan + Nengok Bersamaan ala COD)
         let rotasiY = 0, rotasiX = 0;
         let jalan = false; 
         let waktu = 0;
+
+        // VARIABEL UTAMA PINTU (Ditaruh di sini agar dibaca browser)
+        let engselPintu = new THREE.Group();
+        let pintuTerbuka = false;
+
+        // Membuat objek daun pintu cokelat kayu
+        const pintuGeo = new THREE.BoxGeometry(1.2, 2.0, 0.1);
+        const pintuMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.7 });
+        const daunPintu = new THREE.Mesh(pintuGeo, pintuMat);
+        daunPintu.position.x = 0.6; // Engsel ditaruh di sisi kiri
+        engselPintu.add(daunPintu);
+
+        // Pasang posisi pintu di depan rumah
+        engselPintu.position.set(-0.6, 0, -4.6); 
+        scene.add(engselPintu);
+
         
         let touchJalanId = null;
         let touchKameraId = null;
