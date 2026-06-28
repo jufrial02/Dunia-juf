@@ -135,31 +135,48 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
 
         // 6. ANIMATION LOOP (Gerak & Ayunan Tangan)
         function animate() {
-            requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-            if (jalan) {
-                manusia.translateZ(-0.04); // Kecepatan jalan maju
-                waktu += 0.15;
-            } else {
-                waktu += 0.02;
-            }
+    // 1. Catat posisi lama karakter sebelum melangkah maju
+    const posisiLamaX = manusia.position.x;
+    const posisiLamaZ = manusia.position.z;
 
-            if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
-                const ayunan = Math.sin(waktu) * (jalan ? 0.2 : 0.02);
-                manusia.userData.lenganKanan.rotation.x = 0.1 + ayunan;
-                manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
-            }
+    if (jalan) {
+        manusia.translateZ(-0.04); // Kecepatan jalan maju
+        waktu += 0.15;
+    } else {
+        waktu += 0.02;
+    }
 
-            renderer.render(scene, camera);
+    // 2. SISTEM TABRAKAN (ANTI-TEMBUS)
+    // Cek jarak ke Rumah (posisi rumah ada di koordinat 0, 0, -6)
+    const jarakKeRumah = manusia.position.distanceTo(new THREE.Vector3(0, 0, -6));
+    if (jarakKeRumah < 2.5) { // Jarak aman radius rumah
+        manusia.position.x = posisiLamaX;
+        manusia.position.z = posisiLamaZ;
+    }
+
+    // Cek jarak ke tiap Pohon
+    const posisiPohon = [
+        new THREE.Vector3(-4, 0, -8),
+        new THREE.Vector3(4, 0, -7),
+        new THREE.Vector3(-5, 0, -4)
+    ];
+
+    posisiPohon.forEach((pohon) => {
+        const jarakKePohon = manusia.position.distanceTo(pohon);
+        if (jarakKePohon < 0.6) { // Jarak aman radius pohon
+            manusia.position.x = posisiLamaX;
+            manusia.position.z = posisiLamaZ;
         }
+    });
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+    // 3. Animasi Ayunan Tangan
+    if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
+        const ayunan = Math.sin(waktu) * (jalan ? 0.2 : 0.02);
+        manusia.userData.lenganKanan.rotation.x = 0.1 + ayunan;
+        manusia.userData.lenganKiri.rotation.x = 0.1 - ayunan;
+    }
 
-        animate();
-    </script>
-</body>
-</html>
+    renderer.render(scene, camera);
+}
