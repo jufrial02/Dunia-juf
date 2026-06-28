@@ -137,9 +137,10 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         function animate() {
     requestAnimationFrame(animate);
 
-    // 1. Catat posisi lama karakter sebelum melangkah maju
-    const posisiLamaX = manusia.position.x;
-    const posisiLamaZ = manusia.position.z;
+        // 1. Catat posisi lama karakter sebelum melangkah maju
+        const posisiLamaX = manusia.position.x;
+        const posisiLamaZ = manusia.position.z;
+
 
     if (jalan) {
         manusia.translateZ(-0.04); // Kecepatan jalan maju
