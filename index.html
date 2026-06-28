@@ -88,47 +88,27 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         // 5. KONTROL MULTI-TOUCH HP (Bisa Jalan + Nengok Bersamaan ala COD)
         let rotasiY = 0, rotasiX = 0;
         let jalan = false; 
-            // PENGATURAN PINTU UTAMA
-        let engselPintu = new THREE.Group();
-        let pintuTerbuka = false;
-        let dekatPintu = false;
-
-        // Membuat daun pintu (posisi relatif terhadap engsel di sisi kiri pintu)
-        const pintuGeo = new THREE.BoxGeometry(1.0, 2.0, 0.1);
-        const pintuMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 }); // Warna cokelat kayu
-        const daunPintu = new THREE.Mesh(pintuGeo, pintuMat);
-        daunPintu.position.x = 0.5; // Geser agar titik rotasi engsel pas di pinggir kiri
-        engselPintu.add(daunPintu);
-
-        // Pasang posisi engsel pintu tepat di depan rumah (Rumahmu di 0, 0, -6)
-        // Kita majukan sedikit ke depan rumah di koordinat (0, 0, -4.5)
-        engselPintu.position.set(-0.5, 0, -4.5); 
-        scene.add(engselPintu);
-
-        // Hubungkan tombol HP dengan fungsi rotasi pintu
-        const btnPintu = document.getElementById('tombolPintu');
-        btnPintu.addEventListener('touchstart', () => {
-            pintuTerbuka = !pintuTerbuka;
-            btnPintu.innerText = pintuTerbuka ? "TUTUP PINTU" : "BUKA PINTU";
-        });
-    
         let waktu = 0;
         
         let touchJalanId = null;
         let touchKameraId = null;
         let previousTouchX = 0, previousTouchY = 0;
 
+        // Hubungkan tombol HTML BUKA PINTU dengan fungsi rotasi pintu
+        const btnPintu = document.getElementById('tombolPintu');
+        btnPintu.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            pintuTerbuka = !pintuTerbuka;
+            btnPintu.innerText = pintuTerbuka ? "TUTUP PINTU" : "BUKA PINTU";
+        });
+
         window.addEventListener('touchstart', (e) => {
-            // Periksa setiap jari yang baru menempel di layar
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const touch = e.changedTouches[i];
-                
-                // Jari di sebelah KIRI layar = JALAN
                 if (touch.clientX < window.innerWidth / 2 && touchJalanId === null) {
                     touchJalanId = touch.identifier;
                     jalan = true;
                 } 
-                // Jari di sebelah KANAN layar = KAMERA
                 else if (touch.clientX >= window.innerWidth / 2 && touchKameraId === null) {
                     touchKameraId = touch.identifier;
                     previousTouchX = touch.clientX;
@@ -138,16 +118,13 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         });
 
         window.addEventListener('touchmove', (e) => {
-            // Periksa jari mana yang sedang bergerak
             for (let i = 0; i < e.touches.length; i++) {
                 const touch = e.touches[i];
-                
-                // Jika jari yang bergerak adalah jari kamera (Kanan)
                 if (touch.identifier === touchKameraId) {
                     const deltaX = touch.clientX - previousTouchX;
                     const deltaY = touch.clientY - previousTouchY;
                     
-                    rotasiY -= deltaX * 0.002; // Sensitivitas kamera
+                    rotasiY -= deltaX * 0.002; 
                     rotasiX -= deltaY * 0.002;
                     rotasiX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotasiX));
                     
@@ -161,13 +138,11 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         });
 
         window.addEventListener('touchend', (e) => {
-            // Periksa jari mana yang diangkat dari layar
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const touch = e.changedTouches[i];
-                
                 if (touch.identifier === touchJalanId) {
                     touchJalanId = null;
-                    jalan = false; // Berhenti jalan jika jempol kiri diangkat
+                    jalan = false; 
                 }
                 if (touch.identifier === touchKameraId) {
                     touchKameraId = null;
@@ -175,42 +150,11 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
             }
         });
 
-        // 6. ANIMATION LOOP (Gerak & Ayunan Tangan)
-        // ====================================================
-        // PENGATURAN & TOMBOL PINTU OTOMATIS
-        // ====================================================
-        let engselPintu = new THREE.Group();
-        let pintuTerbuka = false;
-
-        // Membuat daun pintu cokelat kayu
-        const pintuGeo = new THREE.BoxGeometry(1.2, 2.0, 0.1);
-        const pintuMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.7 });
-        const daunPintu = new THREE.Mesh(pintuGeo, pintuMat);
-        daunPintu.position.x = 0.6; // Titik rotasi pas di kiri
-        engselPintu.add(daunPintu);
-
-        // Pasang pintu tepat di depan rumah
-        engselPintu.position.set(-0.6, 0, -4.6); 
-        scene.add(engselPintu);
-
-        // Buat tombol interaktif di HP Realme kamu
-        const btnPintu = document.createElement('button');
-        btnPintu.innerText = "BUKA PINTU";
-        btnPintu.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; background:rgba(0,0,0,0.8); color:white; border:2px solid white; border-radius:8px; font-size:16px; font-weight:bold; display:none; z-index:10;";
-        document.body.appendChild(btnPintu);
-
-        btnPintu.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            pintuTerbuka = !pintuTerbuka;
-            btnPintu.innerText = pintuTerbuka ? "TUTUP PINTU" : "BUKA PINTU";
-        });
-
-
         // 6. ANIMATION LOOP
         function animate() {
             requestAnimationFrame(animate);
 
-            // Catat posisi lama untuk pengerem
+            // Catat posisi lama untuk pengerem sliding
             const posisiLamaX = manusia.position.x;
             const posisiLamaZ = manusia.position.z;
 
@@ -221,16 +165,16 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
                 waktu += 0.02;
             }
 
-            // A. ANIMASI PINTU BERPUTAR MAJU/MUNDUR
+            // A. ANIMASI PINTU BERPUTAR
             const targetRotasi = pintuTerbuka ? -Math.PI / 2 : 0;
             engselPintu.rotation.y += (targetRotasi - engselPintu.rotation.y) * 0.1;
 
-            // B. CEK JARAK MANUSIA KE PINTU
-            const jarakKePintu = manusia.position.distanceTo(new THREE.Vector3(0, 0, -4.6));
+            // B. CEK JARAK MANUSIA KE PINTU UTAMA
+            const jarakKePintu = manusia.position.distanceTo(new THREE.Vector3(0, 0, -4.5));
             if (jarakKePintu < 2.0) {
-                btnPintu.style.display = "block";
+                btnPintu.style.display = "block"; // Muncul kalau dekat pintu
             } else {
-                btnPintu.style.display = "none";
+                btnPintu.style.display = "none";  // Sembunyi kalau menjauh
             }
 
             // C. DETEKSI TABRAKAN RUMAH (Hanya ngerem kalau pintu TUTUP)
@@ -245,7 +189,7 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
                 }
             }
 
-            // D. DETEKSI TABRAKAN POHON
+            // D. DETEKSI TABRAKAN POHON (PADAT & SLIDING)
             const posisiPohon = [
                 new THREE.Vector3(-4, 0, -8),
                 new THREE.Vector3(4, 0, -7),
@@ -283,3 +227,5 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
     </script>
 </body>
 </html>
+
+             
