@@ -149,28 +149,35 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         waktu += 0.02;
     }
 
-    // 2. SISTEM TABRAKAN (ANTI-TEMBUS)
-    // Cek jarak ke Rumah (posisi rumah ada di koordinat 0, 0, -6)
-    const jarakKeRumah = manusia.position.distanceTo(new THREE.Vector3(0, 0, -6));
-    if (jarakKeRumah < 2.5) { // Jarak aman radius rumah
-        manusia.position.x = posisiLamaX;
-        manusia.position.z = posisiLamaZ;
-    }
-
-    // Cek jarak ke tiap Pohon
-    const posisiPohon = [
-        new THREE.Vector3(-4, 0, -8),
-        new THREE.Vector3(4, 0, -7),
-        new THREE.Vector3(-5, 0, -4)
-    ];
-
-    posisiPohon.forEach((pohon) => {
-        const jarakKePohon = manusia.position.distanceTo(pohon);
-        if (jarakKePohon < 0.6) { // Jarak aman radius pohon
-            manusia.position.x = posisiLamaX;
-            manusia.position.z = posisiLamaZ;
+        // 2. LOGIKA DETEKSI TABRAKAN (DIPADATKAN & ANTI-SUMBAT)
+        // Batas Rumah (Kita tebalkan radiusnya jadi 3.2 meter)
+        const posisiCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
+        if (posisiCekX.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
+            manusia.position.x = posisiLamaX; 
         }
-    });
+        const posisiCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
+        if (posisiCekZ.distanceTo(new THREE.Vector3(0, 0, -6)) < 3.2) {
+            manusia.position.z = posisiLamaZ; 
+        }
+
+        // Batas Pohon-Pohon (Kita tebalkan radiusnya jadi 1.2 meter)
+        const posisiPohon = [
+            new THREE.Vector3(-4, 0, -8),
+            new THREE.Vector3(4, 0, -7),
+            new THREE.Vector3(-5, 0, -4)
+        ];
+        
+        posisiPohon.forEach((pohon) => {
+            const pCekX = new THREE.Vector3(manusia.position.x, 0, posisiLamaZ);
+            if (pCekX.distanceTo(pohon) < 1.2) {
+                manusia.position.x = posisiLamaX;
+            }
+            const pCekZ = new THREE.Vector3(posisiLamaX, 0, manusia.position.z);
+            if (pCekZ.distanceTo(pohon) < 1.2) {
+                manusia.position.z = posisiLamaZ;
+            }
+        });
+
 
     // 3. Animasi Ayunan Tangan
     if (manusia.userData.lenganKanan && manusia.userData.lenganKiri) {
