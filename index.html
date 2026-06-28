@@ -125,8 +125,11 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
                 const touch = e.changedTouches[i];
                 if (touch.clientX < window.innerWidth / 2 && touchJalanId === null) {
                     touchJalanId = touch.identifier;
+                    startTouchJalanY = touch.clientY; // <- Baris ini sudah terselip di sini
                     jalan = true;
                 } 
+
+
                 else if (touch.clientX >= window.innerWidth / 2 && touchKameraId === null) {
                     touchKameraId = touch.identifier;
                     previousTouchX = touch.clientX;
