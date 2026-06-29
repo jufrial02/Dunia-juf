@@ -82,9 +82,13 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
 
         manusia.position.set(0, 0, 0);
         
-        // Kamera dimajukan sedikit (Z = -0.05) agar pas di depan dada/mata player
-        camera.position.set(0, 1.5, -0.05); 
-        manusia.add(camera); 
+                // Kamera dimundurkan ke belakang (Z = 3.5) dan dinaikkan sedikit (Y = 2.0)
+        camera.position.set(0, 2.0, 3.5); 
+        manusia.add(camera);
+        
+        // Membuat kamera otomatis mengarah tepat ke tubuh/kepala karakter
+        camera.lookAt(0, 1.0, 0); 
+
 
         // Dorong posisi tangan ke depan dada agar selalu terlihat di layar HP
         if (manusia.userData.lenganKiri && manusia.userData.lenganKanan) {
