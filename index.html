@@ -62,6 +62,14 @@ import { buatPohon } from './js/komponen.js';
     const rumahUtama = buatRumah();
     rumahUtama.position.set(0, 0, -6); 
     scene.add(rumahUtama);
+        // LANTAI KHUSUS DI DALAM RUMAH (Warna abu-abu semen/keramik)
+    const lantaiDalamGeo = new THREE.PlaneGeometry(6, 6); // Ukuran pas dengan pondasi rumah
+    const lantaiDalamMat = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.5 });
+    const lantaiDalam = new THREE.Mesh(lantaiDalamGeo, lantaiDalamMat);
+    lantaiDalam.rotation.x = -Math.PI / 2; // Ditidurkan
+    lantaiDalam.position.set(0, 0.01, -6); // Dinaikkan 0.01 sedikit agar tidak balapan dengan rumput luar
+    scene.add(lantaiDalam);
+    
 
     // MENANAM POHON DARI FILE JS/KOMPONEN.JS
 const pohon1 = buatPohon(); pohon1.position.set(-4, 0, -8); scene.add(pohon1);
