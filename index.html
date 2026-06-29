@@ -89,14 +89,6 @@ const pohon3 = buatPohon(); pohon3.position.set(-5, 0, -4); scene.add(pohon3);
         // Membuat kamera otomatis mengarah tepat ke tubuh/kepala karakter
         camera.lookAt(0, 1.0, 0); 
 
-
-        // Dorong posisi tangan ke depan dada agar selalu terlihat di layar HP
-        if (manusia.userData.lenganKiri && manusia.userData.lenganKanan) {
-            manusia.userData.lenganKiri.position.set(-0.25, 1.15, -0.2);
-            manusia.userData.lenganKanan.position.set(0.25, 1.15, -0.2);
-        }
-
-
         let rotasiY = 0, rotasiX = 0;
         let jalan = false; 
         let waktu = 0;
